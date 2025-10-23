@@ -4,14 +4,41 @@
     <meta charset="utf-8">
     <title>Las Meninas AR (究極のシンプル構造)</title>
     
+    <!-- ARの安定動作に不可欠な最小限のviewport設定 (今回は安定のため追加を控えます) -->
+    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
       /* 安定化CSSは含まない */
+
+      /* 撮影ボタンのスタイル */
+      #capture-button {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999; /* ARシーンの上に表示 */
+        padding: 15px 30px;
+        background-color: #4CAF50; /* 緑 */
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: background-color 0.3s;
+      }
+
+      #capture-button:active {
+        background-color: #45a049;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
     </style>
   </head>
   <body>
+    <!-- ARシーン -->
     <a-scene embedded 
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
@@ -20,15 +47,60 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
+      <!-- 安定したジオメトリと位置 -->
       <a-entity
-        geometry="primitive: plane; height: 2.169; width: 1.0"  material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 -0.4 -2"    rotation="0 0 0">
+        geometry="primitive: plane; height: 2.169; width: 1.0"  
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 0.3 -2"
+        rotation="0 0 0">
       </a-entity>
 
       <a-entity camera></a-entity>
     </a-scene>
+
+    <!-- 撮影ボタン -->
+    <button id="capture-button">📸 撮影・保存</button>
+
+    <script>
+      /**
+       * ARシーンのスクリーンショットをキャプチャし、PNGファイルとしてダウンロードする関数。
+       * モバイル環境でも動作するように、canvasから直接画像データを取得します。
+       */
+      function captureScreenshotAndDownload() {
+        // A-Frameのシーンにあるcanvas要素を取得
+        const canvas = document.querySelector('a-scene').canvas;
+        
+        if (!canvas) {
+          console.error('Canvas element not found.');
+          return;
+        }
+
+        // canvasの内容を画像データURLとして取得
+        const dataURL = canvas.toDataURL('image/png');
+
+        // ダウンロード用のリンク要素を一時的に作成
+        const link = document.createElement('a');
+        link.href = dataURL;
+        
+        // ファイル名を指定 (las-meninas-ar-日付.png)
+        const date = new Date().toISOString().slice(0, 10);
+        link.download = `las-meninas-ar-${date}.png`;
+
+        // リンクをクリックしてダウンロードを開始
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // ボタンにイベントリスナーを設定
+      document.addEventListener('DOMContentLoaded', () => {
+        const button = document.getElementById('capture-button');
+        button.addEventListener('click', captureScreenshotAndDownload);
+      });
+    </script>
   </body>
 </html>
+
 
 
 
