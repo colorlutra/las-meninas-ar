@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR（視野補正版）</title>
+    <title>Las Meninas AR（もっと浅く）</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -18,11 +18,11 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 高さ0.8、距離を浅くして視野に収める -->
+      <!-- 高さ0.8、距離をさらに浅く（z = -0.8） -->
       <a-entity
         geometry="primitive: plane; height: 1.6; width: 1.066"
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.8 -1.2"
+        position="0 0.8 -0.8"
         rotation="0 0 0">
       </a-entity>
 
@@ -30,6 +30,7 @@
     </a-scene>
   </body>
 </html>
+
 
 
 
