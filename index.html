@@ -1,38 +1,40 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Las Meninas AR (HIRO Marker)</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
-  <body>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-      
-            <a-assets>
-        <img id="meninas" src="lasmeninas_transparent.png">
-                <img id="marker-image" src="lasmeninas_marker.jpg"> 
-      </a-assets>
+  <head>
+    <meta charset="utf-8">
+    <title>Las Meninas AR (Markerless)</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+      
+      <a-assets>
+        <img id="meninas" src="lasmeninas_transparent.png"> 
+        <img id="marker-image" src="lasmeninas_marker.jpg"> 
+      </a-assets>
 
-            <a-marker preset="hiro">
-                <a-entity
-          geometry="primitive: plane; height: 2.0; width: 1.7"
-          material="src: #marker-image"
-          rotation="-90 0 0"
-          position="0 0 0">
-        </a-entity>
+      <a-entity>
+        
+        <a-entity
+          geometry="primitive: plane; height: 3.0; width: 2.5" 
+          material="src: #marker-image"
+          rotation="0 0 0"
+          position="0 1.5 -3"> </a-entity>
 
-                <a-entity 
-          geometry="primitive: plane; height: 2.0; width: 1.7"
-          material="src: #meninas; transparent: true; alphaTest: 0.5"
-          rotation="-90 0 0"
-          position="0 0.001 0">         </a-entity>
-      </a-marker>
+        <a-entity 
+          geometry="primitive: plane; height: 3.0; width: 2.5" 
+          material="src: #meninas; transparent: true; alphaTest: 0.5"
+          rotation="0 0 0"
+          position="0 1.5 -2.99"> </a-entity>
+        
+      </a-entity>
 
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
 </html>
+
