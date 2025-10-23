@@ -4,21 +4,18 @@
     <meta charset="utf-8">
     <title>Las Meninas AR (究極のシンプル構造)</title>
     
-    <!-- ARの安定動作に不可欠な最小限のviewport設定 (今回は安定のため追加を控えます) -->
-    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      /* 安定化CSSは含まない */
-
+      
       /* 撮影ボタンのスタイル */
       #capture-button {
         position: fixed;
         bottom: 40px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 999; /* ARシーンの上に表示 */
+        z-index: 999; 
         padding: 15px 30px;
         background-color: #4CAF50; /* 緑 */
         color: white;
@@ -30,10 +27,24 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         transition: background-color 0.3s;
       }
-
       #capture-button:active {
         background-color: #45a049;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+      /* メッセージボックスのスタイル */
+      #message-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 1000;
+        text-align: center;
+        display: none; /* 初期状態では非表示 */
+        font-size: 16px;
       }
     </style>
   </head>
@@ -51,7 +62,7 @@
       <a-entity
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 -0.4 -2"
+        position="0 0.3 -2"
         rotation="0 0 0">
       </a-entity>
 
@@ -59,14 +70,17 @@
     </a-scene>
 
     <!-- 撮影ボタン -->
-    <button id="capture-button">📸 撮影・保存</button>
+    <button id="capture-button">📸 撮影</button>
+
+    <!-- メッセージボックス -->
+    <div id="message-box">画像を長押しして「画像を保存」を選んでください！</div>
 
     <script>
       /**
-       * ARシーンのスクリーンショットをキャプチャし、PNGファイルとしてダウンロードする関数。
-       * モバイル環境でも動作するように、canvasから直接画像データを取得します。
+       * ARシーンのスクリーンショットをキャプチャし、新しいタブで画像を開く関数。
+       * ユーザーに手動保存を促します。
        */
-      function captureScreenshotAndDownload() {
+      function captureScreenshotAndOpen() {
         // A-Frameのシーンにあるcanvas要素を取得
         const canvas = document.querySelector('a-scene').canvas;
         
@@ -78,24 +92,26 @@
         // canvasの内容を画像データURLとして取得
         const dataURL = canvas.toDataURL('image/png');
 
-        // ダウンロード用のリンク要素を一時的に作成
-        const link = document.createElement('a');
-        link.href = dataURL;
+        // 新しいウィンドウを開いて画像を表示
+        const win = window.open();
+        win.document.write('<html><body style="margin: 0;">');
+        win.document.write('<p style="text-align: center; font-size: 20px; font-weight: bold; padding: 10px;">画像を長押しして保存してください</p>');
+        win.document.write('<img src="' + dataURL + '" style="display: block; width: 100vw; height: auto;">');
+        win.document.write('</body></html>');
+        win.document.close();
         
-        // ファイル名を指定 (las-meninas-ar-日付.png)
-        const date = new Date().toISOString().slice(0, 10);
-        link.download = `las-meninas-ar-${date}.png`;
-
-        // リンクをクリックしてダウンロードを開始
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // メッセージを表示
+        const msgBox = document.getElementById('message-box');
+        msgBox.style.display = 'block';
+        setTimeout(() => {
+          msgBox.style.display = 'none';
+        }, 3000); // 3秒後にメッセージを非表示
       }
 
       // ボタンにイベントリスナーを設定
       document.addEventListener('DOMContentLoaded', () => {
         const button = document.getElementById('capture-button');
-        button.addEventListener('click', captureScreenshotAndDownload);
+        button.addEventListener('click', captureScreenshotAndOpen);
       });
     </script>
   </body>
