@@ -31,25 +31,11 @@
         background-color: #45a049;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
       }
-      /* メッセージボックスのスタイル */
-      #message-box {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        z-index: 1000;
-        text-align: center;
-        display: none; /* 初期状態では非表示 */
-        font-size: 16px;
-      }
     </style>
   </head>
   <body>
-    <!-- ARシーン --><a-scene embedded 
+    <!-- ARシーン -->
+    <a-scene embedded 
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
@@ -57,7 +43,8 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 安定したジオメトリと位置 --><a-entity
+      <!-- 安定したジオメトリと位置 -->
+      <a-entity
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
         position="0 0.3 -2"
@@ -67,47 +54,61 @@
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- 撮影ボタン --><button id="capture-button">📸 撮影</button>
-
-    <!-- メッセージボックス --><div id="message-box">画像を長押しして「画像を保存」を選んでください！</div>
+    <!-- 撮影ボタン -->
+    <button id="capture-button">📸 撮影・保存</button>
 
     <script>
       /**
-       * A-Frameのスクリーンショット機能を使用してARシーンをキャプチャし、
-       * 新しいタブで画像を開いて手動保存を促す関数。
+       * dataURLをバイナリデータに変換し、ファイルとして強制ダウンロードさせる関数。
        */
-      function captureScreenshotAndOpen() {
+      function dataURLtoBlob(dataurl) {
+        let arr = dataurl.split(','), 
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), 
+            n = bstr.length, 
+            u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {type:mime});
+      }
+
+      function captureScreenshotAndDownload() {
         const scene = document.querySelector('a-scene');
         
-        // A-Frameのscreenshotコンポーネントが利用可能か確認
         if (!scene || !scene.components.screenshot) {
           console.error('A-Frame screenshot component not found.');
           return;
         }
 
-        // A-Frameのスクリーンショット機能で画像データを取得
-        // 'perspective' はARカメラの視点からキャプチャすることを意味します
-        scene.components.screenshot.capture('perspective').then(dataURL => {
-          if (!dataURL || dataURL === 'data:,') { // データがない、または空のデータの場合
+        // A-Frameのスクリーンショット機能でJPEG画像データを取得
+        // format: 'jpg'に変更し、画質を1.0 (最高) に設定
+        scene.components.screenshot.capture('perspective', 'jpg', 1.0).then(dataURL => {
+          if (!dataURL || dataURL === 'data:,') {
             console.error('Failed to capture screenshot data.');
             alert('スクリーンショットの取得に失敗しました。');
             return;
           }
 
-          // 新しいウィンドウを開いて画像を表示
-          const win = window.open();
-          win.document.write('<html><body style="margin: 0;">');
-          win.document.write('<p style="text-align: center; font-size: 20px; font-weight: bold; padding: 10px;">画像を長押しして保存してください</p>');
-          win.document.write('<img src="' + dataURL + '" style="display: block; width: 100vw; height: auto;">');
-          win.document.write('</body></html>');
-          win.document.close();
+          // 1. dataURLをBlob（バイナリデータ）に変換
+          const blob = dataURLtoBlob(dataURL);
           
-          // メッセージを表示
-          const msgBox = document.getElementById('message-box');
-          msgBox.style.display = 'block';
-          setTimeout(() => {
-            msgBox.style.display = 'none';
-          }, 3000); // 3秒後にメッセージを非表示
+          // 2. Blobから一時的なURLを作成
+          const blobUrl = URL.createObjectURL(blob);
+
+          // 3. ダウンロード用のリンク要素を一時的に作成し、ダウンロードを実行
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          
+          const date = new Date().toISOString().slice(0, 10);
+          link.download = `las-meninas-ar-${date}.jpg`; // 拡張子をjpgに変更
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // 4. 一時URLを解放
+          URL.revokeObjectURL(blobUrl);
 
         }).catch(error => {
           console.error('Error capturing screenshot:', error);
@@ -118,11 +119,12 @@
       // ボタンにイベントリスナーを設定
       document.addEventListener('DOMContentLoaded', () => {
         const button = document.getElementById('capture-button');
-        button.addEventListener('click', captureScreenshotAndOpen);
+        button.addEventListener('click', captureScreenshotAndDownload);
       });
     </script>
   </body>
 </html>
+
 
 
 
