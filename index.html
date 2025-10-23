@@ -2,12 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (スマホ補正版)</title>
+    <title>Las Meninas AR (自然表示版)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      .a-canvas { width: 100vw !important; height: 100vh !important; }
+      /* 画面いっぱいに広げる設定は削除 */
     </style>
   </head>
   <body>
@@ -19,11 +19,11 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- スマホのカメラ位置に合わせて画像を少し右寄りに配置 -->
+      <!-- 自然なサイズで中央表示 -->
       <a-entity
-        geometry="primitive: plane; height: 1.6; width: 0.9"
+        geometry="primitive: plane; height: 1.2; width: 0.8"
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0.15 0 -1.5"
+        position="0 1.2 -2"
         rotation="0 0 0">
       </a-entity>
 
