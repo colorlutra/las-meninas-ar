@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (Full Screen)</title>
+    <title>Las Meninas AR (スマホ補正版)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -19,11 +19,11 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 画面中央に表示、スマホ比率に合わせたサイズ -->
+      <!-- スマホのカメラ位置に合わせて画像を少し右寄りに配置 -->
       <a-entity
         geometry="primitive: plane; height: 1.6; width: 0.9"
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0 -1.5"
+        position="0.15 0 -1.5"
         rotation="0 0 0">
       </a-entity>
 
