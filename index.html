@@ -7,41 +7,39 @@
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      /* CSSでカメラ映像を画面いっぱいに広げる設定を強制 */
       .a-canvas { width: 100vw !important; height: 100vh !important; }
     </style>
   </head>
   <body>
     <a-scene embedded 
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false; cameraParametersUrl: camera_para.dat;" 
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
-      
+
       <a-assets>
-        <img id="meninas" src="lasmeninas_transparent.png"> 
-        <img id="marker-image" src="lasmeninas_marker.jpg"> 
+        <img id="meninas" src="lasmeninas_transparent.png">
+        <img id="marker-image" src="lasmeninas_marker.jpg">
       </a-assets>
 
-      <a-entity>
-        
-        <a-entity
-          geometry="primitive: plane; height: 4.0; width: 3.5"  /* サイズをさらに拡大 */
-          material="src: #marker-image"
-          rotation="0 0 0"
-          position="0 1.5 -1.5"> /* Zを-1.5mまで近づける */
-        </a-entity>
+      <!-- フレーム背景（非透過） -->
+      <a-entity
+        geometry="primitive: plane; height: 1.92; width: 1.08"
+        material="src: #marker-image"
+        position="0 1.5 -1.5"
+        rotation="0 0 0">
+      </a-entity>
 
-        <a-entity 
-          geometry="primitive: plane; height: 4.0; width: 3.5" /* サイズをさらに拡大 */
-          material="src: #meninas; transparent: true; alphaTest: 0.05;" /* alphaTestをさらに厳しく (0.05) */
-          rotation="0 0 0"
-          position="0 1.5 -1.49"> /* Zを-1.49mまで近づける */
-        </a-entity>
-        
+      <!-- 透過絵画（人物が入り込める） -->
+      <a-entity
+        geometry="primitive: plane; height: 1.92; width: 1.08"
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 1.5 -1.49"
+        rotation="0 0 0">
       </a-entity>
 
       <a-entity camera></a-entity>
     </a-scene>
   </body>
 </html>
+
 
 
