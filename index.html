@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
+      /* CSSでカメラ映像を画面いっぱいに広げる設定を強制 */
+      .a-canvas { width: 100vw !important; height: 100vh !important; }
     </style>
   </head>
   <body>
@@ -22,17 +24,17 @@
       <a-entity>
         
         <a-entity
-          geometry="primitive: plane; height: 3.5; width: 3.0"  
+          geometry="primitive: plane; height: 4.0; width: 3.5"  /* サイズをさらに拡大 */
           material="src: #marker-image"
           rotation="0 0 0"
-          position="0 1.5 -2.0"> 
+          position="0 1.5 -1.5"> /* Zを-1.5mまで近づける */
         </a-entity>
 
-        <a-entity
-          geometry="primitive: plane; height: 3.5; width: 3.0"
-          material="src: #meninas; transparent: true; alphaTest: 0.1;" 
+        <a-entity 
+          geometry="primitive: plane; height: 4.0; width: 3.5" /* サイズをさらに拡大 */
+          material="src: #meninas; transparent: true; alphaTest: 0.05;" /* alphaTestをさらに厳しく (0.05) */
           rotation="0 0 0"
-          position="0 1.5 -1.99">
+          position="0 1.5 -1.49"> /* Zを-1.49mまで近づける */
         </a-entity>
         
       </a-entity>
