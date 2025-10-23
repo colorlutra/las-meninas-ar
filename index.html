@@ -2,11 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (カメラ子要素固定版)</title>
+    <title>Las Meninas AR (最終確定版)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
+      /* 画面いっぱいのサイズを強制 */
       .a-canvas { width: 100vw !important; height: 100vh !important; }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1, maximum-scale=1">
@@ -22,9 +23,9 @@
 
       <a-entity camera>
         <a-entity
-          geometry="primitive: plane; height: 4.0; width: 3.35"  /* ★ 歪み防止と最大表示のサイズを維持 ★ */
+          geometry="primitive: plane; height: 4.0; width: 3.35"  /* 歪みのない比率 (4.0:3.35) で画面いっぱいのサイズ */
           material="src: #meninas; transparent: true; alphaTest: 0.05"
-          position="0 -0.5 -3.5"   /* ★ 調整：Y軸を下げ、Z軸を遠ざけて画面いっぱいに ★ */
+          position="0 -0.5 -3.5"   /* X=0 (中心)、Y=-0.5 (高さ調整)、Z=-3.5 (距離) */
           rotation="0 0 0">
         </a-entity>
       </a-entity>
@@ -32,6 +33,7 @@
     </a-scene>
   </body>
 </html>
+
 
 
 
