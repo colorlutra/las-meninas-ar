@@ -23,9 +23,9 @@
 
       <a-entity camera>
         <a-entity
-          geometry="primitive: plane; height: 4.0; width: 3.35"  /* 歪みのない比率 (4.0:3.35) で画面いっぱいのサイズ */
+          geometry="primitive: plane; height: 4.0; width: 3.35"  /* ★ 3000:2515の比率 (1.192:1) を適用した最大サイズ ★ */
           material="src: #meninas; transparent: true; alphaTest: 0.05"
-          position="0 -0.5 -3.5"   /* X=0 (中心)、Y=-0.5 (高さ調整)、Z=-3.5 (距離) */
+          position="0 -0.5 -3.5"   /* X=0 (中心)、Y=-0.5 (床合わせ)、Z=-3.5 (距離) */
           rotation="0 0 0">
         </a-entity>
       </a-entity>
