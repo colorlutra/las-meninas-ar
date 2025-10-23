@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (Markerless)</title>
+    <title>Las Meninas AR (Full Screen)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -17,22 +17,13 @@
 
       <a-assets>
         <img id="meninas" src="lasmeninas_transparent.png">
-        <img id="marker-image" src="lasmeninas_marker.jpg">
       </a-assets>
 
-      <!-- フレーム背景（非透過） -->
+      <!-- 画面中央に表示、スマホ比率に合わせたサイズ -->
       <a-entity
-        geometry="primitive: plane; height: 1.92; width: 1.08"
-        material="src: #marker-image"
-        position="0 1.5 -1.5"
-        rotation="0 0 0">
-      </a-entity>
-
-      <!-- 透過絵画（人物が入り込める） -->
-      <a-entity
-        geometry="primitive: plane; height: 1.92; width: 1.08"
+        geometry="primitive: plane; height: 1.6; width: 0.9"
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 1.5 -1.49"
+        position="0 0 -1.5"
         rotation="0 0 0">
       </a-entity>
 
@@ -40,6 +31,7 @@
     </a-scene>
   </body>
 </html>
+
 
 
 
