@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (正面固定版)</title>
+    <title>Las Meninas AR (最終安定化版)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -21,11 +21,12 @@
       </a-assets>
 
       <a-entity
-        geometry="primitive: plane; height: 1.78; width: 1.0"
+        geometry="primitive: plane; height: 8.9; width: 5.0"  /* ★ サイズを5倍に拡大 (1.78*5, 1.0*5) ★ */
         material="src: #meninas; transparent: true; alphaTest: 0.05;" 
         rotation="0 0 0"
-        position="0 -0.4 -1.5"  /* スマホ最適高さを使用 */
-        look-at="[camera]"> </a-entity>
+        position="0 -0.4 -5.0" /* Zを-5.0mまで遠ざける (サイズに合わせて調整) */
+        look-at="[camera]"> 
+      </a-entity>
       
       <a-entity camera></a-entity>
     </a-scene>
