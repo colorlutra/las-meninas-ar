@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (歪み強制停止版)</title>
+    <title>Las Meninas AR (最終確定版)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
@@ -13,25 +13,25 @@
   </head>
   <body>
     <a-scene embedded 
-      arjs="sourceType: webcam; debugUIEnabled: false;"  /* ★ trackingMethod: bestを削除 ★ */
+      arjs="sourceType: webcam; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
       <a-assets>
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <a-entity camera>
-        <a-entity
-          geometry="primitive: plane; height: 3.0; width: 2.517"
-          material="src: #meninas; transparent: true; alphaTest: 0.05"
-          position="0 1.5 -3.5"    /* Y=1.5 (下端合わせ)、Z=-3.5 (距離) */
-          rotation="0 0 0">
-        </a-entity>
+      <a-entity
+        geometry="primitive: plane; height: 3.0; width: 2.517"  
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 1.5 -3.5"    
+        rotation="0 0 0">
       </a-entity>
 
+      <a-entity camera></a-entity>
     </a-scene>
   </body>
 </html>
+
 
 
 
