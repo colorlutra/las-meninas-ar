@@ -46,6 +46,11 @@
       #info-icon-button { 
         background-color: rgba(66, 133, 244, 0.8); /* 青色 */
       }
+      /* モード切替アイコン（初期は緑色の固定モード） */
+      #mode-icon-button {
+        background-color: rgba(40, 167, 69, 0.8); /* 緑色 */
+      }
+
 
       /* =================================================== */
       /* 2. 設定パネル (オーバーレイ) */
@@ -91,8 +96,8 @@
       #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
       #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
       
-      /* 新しいモード切替ボタン */
-      #mode-toggle-button { background-color: #28a745; flex-basis: calc(33% - 8px); } 
+      /* モード切替ボタン (パネル内) */
+      #mode-toggle-button { flex-basis: calc(33% - 8px); } 
 
       
       /* =================================================== */
@@ -137,12 +142,10 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- A-Frameデフォルトカメラ (AR.jsがオーバーライドするが、look-controlsを明示的に無効化) -->
-      <!-- ユーザーの操作やデバイスの傾きによる視点変更を防止し、完全に固定する -->
+      <!-- A-Frameデフォルトカメラ -->
       <a-entity id="ar-camera" camera look-controls="enabled: false" position="0 0 0"></a-entity>
 
       <!-- 安定したジオメトリと位置 -->
-      <!-- Z座標を-2.0に変更 (シンプル構造の最適値) -->
       <a-entity id="ar-painting"
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
@@ -153,10 +156,12 @@
       
     </a-scene>
 
-    <!-- UI: 右下のアイコンコンテナ -->
+    <!-- UI: 右下のアイコンコンテナ (常時表示) -->
     <div id="initial-buttons-container">
       <button id="settings-icon-button" class="initial-icon-button">⚙️</button>
       <button id="info-icon-button" class="initial-icon-button">💡</button>
+      <!-- モード切替アイコンをここに追加 -->
+      <button id="mode-icon-button" class="initial-icon-button">🔄</button>
     </div>
 
     <!-- UI: 設定パネル (詳細操作) -->
@@ -193,10 +198,14 @@
       const SETTINGS_ICON_BUTTON = document.getElementById('settings-icon-button');
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
-      const MODE_TOGGLE_BUTTON = document.getElementById('mode-toggle-button'); // モード切替ボタンを取得
+      
+      // モード切替ボタン (2種類)
+      const MODE_TOGGLE_BUTTON = document.getElementById('mode-toggle-button'); // パネル内の大きなボタン
+      const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     // 初期表示のアイコン
 
-      // 初期値 (リセット用): Z軸を-2.0に変更
-      const INITIAL_POSITION = { x: 0, y: 0.3, z: -2.0 }; 
+      // 定義: モードごとの初期位置
+      const FIXED_POSITION = { x: 0, y: 0.3, z: -2.0 };     // 固定モード (撮影向け): 近い位置
+      const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -4.0 };   // 臨場感モード (没入向け): 遠い位置
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
       // 定数
@@ -252,8 +261,9 @@
       
       // --- リセット機能 ---
       function resetPaintingPosition() {
+        // 固定モードの初期位置に戻す
         updatePaintingTransform(
-          INITIAL_POSITION,
+          FIXED_POSITION,
           INITIAL_SCALE
         );
       }
@@ -262,21 +272,34 @@
       function toggleCameraMode() {
         // look-controlsの状態を取得
         const isEnabled = CAMERA_EL.getAttribute('look-controls').enabled;
-
-        // 状態を反転
         const newEnabled = !isEnabled;
+        
+        // 1. カメラ設定の切り替え
         CAMERA_EL.setAttribute('look-controls', { enabled: newEnabled });
 
-        // ボタンのテキストを更新
-        if (newEnabled) {
-          MODE_TOGGLE_BUTTON.textContent = '🕹️ 臨場感モード';
-          MODE_TOGGLE_BUTTON.style.backgroundColor = '#ffc107'; // 黄色系
-          MODE_TOGGLE_BUTTON.style.color = '#333';
-        } else {
-          MODE_TOGGLE_BUTTON.textContent = '🔄 固定モード';
-          MODE_TOGGLE_BUTTON.style.backgroundColor = '#28a745'; // 緑色系
-          MODE_TOGGLE_BUTTON.style.color = 'white';
-        }
+        // 2. 絵の位置の調整 (Z軸の変更)
+        const currentScale = PAINTING_EL.getAttribute('scale');
+        // 新しいモードに基づいてターゲット位置を選択
+        const targetPosition = newEnabled ? IMMERSIVE_POSITION : FIXED_POSITION;
+        PAINTING_EL.setAttribute('position', targetPosition);
+
+        // 3. ボタンのテキストと色の更新
+        const buttonText = newEnabled ? '🕹️ 臨場感モード' : '🔄 固定モード';
+        const bgColor = newEnabled ? '#ffc107' : '#28a745';
+        const textColor = newEnabled ? '#333' : 'white';
+        const iconBgColor = newEnabled ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)';
+        const iconColor = newEnabled ? '#333' : 'white';
+
+
+        // パネル内のボタンを更新
+        MODE_TOGGLE_BUTTON.textContent = buttonText;
+        MODE_TOGGLE_BUTTON.style.backgroundColor = bgColor;
+        MODE_TOGGLE_BUTTON.style.color = textColor;
+        
+        // アイコンを更新
+        MODE_ICON_BUTTON.textContent = newEnabled ? '🕹️' : '🔄'; 
+        MODE_ICON_BUTTON.style.backgroundColor = iconBgColor;
+        MODE_ICON_BUTTON.style.color = iconColor;
       }
 
 
@@ -290,10 +313,14 @@
         const moveRightButton = document.getElementById('move-right-button');
         const resetButton = document.getElementById('reset-button');
         
-        // 初期モードのボタン表示を設定
+        // 初期モードの設定 (固定モード)
+        // DOMContentLoaded時に一度実行し、ボタンの初期状態を反映させる
+        // look-controls="enabled: false" が初期値なので、それに合わせた表示にする
+        // toggleCameraModeが初期化も兼ねるため、初期状態の表示を確定させる
         MODE_TOGGLE_BUTTON.textContent = '🔄 固定モード';
         MODE_TOGGLE_BUTTON.style.backgroundColor = '#28a745';
-
+        MODE_ICON_BUTTON.textContent = '🔄';
+        MODE_ICON_BUTTON.style.backgroundColor = 'rgba(40, 167, 69, 0.8)';
 
         // 1. 設定パネル表示/非表示トグル (⚙️)
         SETTINGS_ICON_BUTTON.addEventListener('click', () => {
@@ -326,8 +353,10 @@
         moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
         moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
         
-        // モード切替
+        // モード切替 (アイコンとパネル内の両方にリスナーを設定)
         MODE_TOGGLE_BUTTON.addEventListener('click', toggleCameraMode);
+        MODE_ICON_BUTTON.addEventListener('click', toggleCameraMode);
+
 
         // リセット機能
         resetButton.addEventListener('click', resetPaintingPosition);
