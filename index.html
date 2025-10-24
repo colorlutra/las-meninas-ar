@@ -2,10 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (操作機能追加版)</title>
+    <title>ラス・メニーナス AR (臨場感最終版)</title>
     
-    <!-- A-FrameとAR.jsの読み込み -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <!-- A-FrameとAR.jsの読み込み --><script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     
     <style>
@@ -92,45 +91,7 @@
       #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
       
       /* =================================================== */
-      /* 3. 撮影ボタンとメッセージボックス (既存のデザイン) */
-      /* =================================================== */
-      #capture-button {
-        position: fixed;
-        bottom: 80px; /* 操作パネルと干渉しないように上へ移動 */
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999; 
-        padding: 15px 30px;
-        background-color: #4CAF50; /* 緑 */
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition: background-color 0.3s;
-      }
-      #capture-button:active {
-        background-color: #45a049;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-      }
-      #message-box {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        z-index: 1000;
-        text-align: center;
-        display: none;
-        font-size: 16px;
-      }
-      /* =================================================== */
-      /* 4. 解説パネル (オーバーレイ) */
+      /* 3. 解説パネル (オーバーレイ) */
       /* =================================================== */
       #explanation-panel {
         position: fixed;
@@ -161,8 +122,7 @@
     </style>
   </head>
   <body>
-    <!-- ARシーン -->
-    <a-scene embedded 
+    <!-- ARシーン --><a-scene embedded 
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
@@ -170,49 +130,33 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 安定したジオメトリと位置 -->
-      <a-entity id="ar-painting"
+      <!-- 安定したジオメトリと位置 --><a-entity id="ar-painting"
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -2"
-        rotation="0 0 0"
+        position="0 0.3 -5.0" <!-- Z軸を -5.0 に変更 -->rotation="0 0 0"
         scale="1 1 1">
       </a-entity>
       
-      <!-- AR.jsを使用する場合、<a-entity camera>はAR.jsと干渉するため削除します -->
-      
     </a-scene>
 
-    <!-- UI: 右下のアイコンコンテナ -->
-    <div id="initial-buttons-container">
+    <!-- UI: 右下のアイコンコンテナ --><div id="initial-buttons-container">
       <button id="settings-icon-button" class="initial-icon-button">⚙️</button>
       <button id="info-icon-button" class="initial-icon-button">💡</button>
     </div>
 
-    <!-- UI: 設定パネル (詳細操作) -->
-    <div id="settings-panel">
-      <!-- 1行目: ズーム -->
-      <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
+    <!-- UI: 設定パネル (詳細操作) --><div id="settings-panel">
+      <!-- 1行目: ズーム --><button id="zoom-in-button" class="setting-button">➕ 拡大</button>
       <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
       
-      <!-- 2行目: 上下左右 -->
-      <button id="move-up-button" class="setting-button">⬆️ 上へ</button>
+      <!-- 2行目: 上下左右 --><button id="move-up-button" class="setting-button">⬆️ 上へ</button>
       <button id="move-down-button" class="setting-button">⬇️ 下へ</button>
       <button id="move-left-button" class="setting-button">⬅️ 左へ</button>
       <button id="move-right-button" class="setting-button">➡️ 右へ</button>
 
-      <!-- 3行目: リセット -->
-      <button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
+      <!-- 3行目: リセット --><button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
     </div>
 
-    <!-- 撮影ボタン (中央下) -->
-    <button id="capture-button">📸 撮影</button>
-
-    <!-- メッセージボックス -->
-    <div id="message-box">画像を長押しして「画像を保存」を選んでください！</div>
-
-    <!-- UI: 解説パネル -->
-    <div id="explanation-panel">
+    <!-- UI: 解説パネル --><div id="explanation-panel">
       <h3>ラス・メニーナス (女官たち)</h3>
       <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
       💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、人が映り込むトリックアートを完成させよう！</p>
@@ -227,9 +171,8 @@
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
 
-      // ユーザー提供のA-Frameコードから初期値を設定 (リセット用)
-      // position="0 0.3 -2" を初期値とする
-      const INITIAL_POSITION = { x: 0, y: 0.3, z: -2.0 }; 
+      // 初期値 (リセット用): Z軸を -5.0 に変更
+      const INITIAL_POSITION = { x: 0, y: 0.3, z: -5.0 }; 
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
       // 定数
@@ -237,13 +180,6 @@
       const MOVE_STEP = 0.2;   // 移動のステップ (m単位)
       const MAX_SCALE = 5.0;   // 最大スケール
       const MIN_SCALE = 0.5;   // 最小スケール
-
-      // A-Frameカメラの削除 (AR.jsと干渉回避のため、念のためDOMから削除)
-      const existingCamera = document.querySelector('a-entity[camera]');
-      if (existingCamera) {
-          existingCamera.remove();
-          console.log('Removed conflicting A-Frame camera entity.');
-      }
 
       /**
        * ARエンティティの位置とスケールを一括で更新する
@@ -259,15 +195,12 @@
         
         let newScaleValue;
         if (direction === 'in') {
-          // 拡大
           newScaleValue = Math.min(MAX_SCALE, currentScale.x + ZOOM_STEP); 
         } else {
-          // 縮小
           newScaleValue = Math.max(MIN_SCALE, currentScale.x - ZOOM_STEP); 
         }
 
         if (newScaleValue !== currentScale.x) {
-          // スケール変更 (x, y, zを同じ値にして比率を維持)
           const newScale = { x: newScaleValue, y: newScaleValue, z: newScaleValue };
           let currentPos = PAINTING_EL.getAttribute('position');
           
@@ -289,7 +222,6 @@
         } else if (axis === 'Y') {
           newY = currentPos.y + step;
         } else if (axis === 'Z') {
-          // Z軸移動はスケールと関係ないため、単純な加算
           newZ = currentPos.z + step;
         }
 
@@ -304,49 +236,8 @@
         );
       }
 
-      /**
-       * ARシーンのスクリーンショットをキャプチャし、新しいタブで画像を開く関数。
-       * ユーザーに手動保存を促します。(既存の撮影機能)
-       */
-      function captureScreenshotAndOpen() {
-        // A-Frameのシーンにあるcanvas要素を取得
-        const canvas = document.querySelector('a-scene').canvas;
-        
-        if (!canvas) {
-          console.error('Canvas element not found.');
-          return;
-        }
-
-        // canvasの内容を画像データURLとして取得
-        const dataURL = canvas.toDataURL('image/png');
-
-        // 新しいウィンドウを開いて画像を表示
-        const win = window.open();
-        // window.open()がブロックされる可能性があるため、setTimeoutでメッセージを遅延させる
-        setTimeout(() => {
-            if (win) {
-                win.document.write('<html><body style="margin: 0;">');
-                win.document.write('<p style="text-align: center; font-size: 20px; font-weight: bold; padding: 10px;">画像を長押しして保存してください</p>');
-                win.document.write('<img src="' + dataURL + '" style="display: block; width: 100vw; height: auto;">');
-                win.document.write('</body></html>');
-                win.document.close();
-            } else {
-                 console.error('Popup window blocked.');
-            }
-        }, 10);
-        
-        // メッセージを表示
-        const msgBox = document.getElementById('message-box');
-        msgBox.style.display = 'block';
-        setTimeout(() => {
-          msgBox.style.display = 'none';
-        }, 3000); // 3秒後にメッセージを非表示
-      }
-
-
       // --- イベントリスナーの設定 ---
       document.addEventListener('DOMContentLoaded', () => {
-        const captureButton = document.getElementById('capture-button');
         const zoomInButton = document.getElementById('zoom-in-button');
         const zoomOutButton = document.getElementById('zoom-out-button');
         const moveUpButton = document.getElementById('move-up-button');
@@ -354,9 +245,6 @@
         const moveLeftButton = document.getElementById('move-left-button');
         const moveRightButton = document.getElementById('move-right-button');
         const resetButton = document.getElementById('reset-button');
-
-        // 撮影機能
-        captureButton.addEventListener('click', captureScreenshotAndOpen);
 
         // 1. 設定パネル表示/非表示トグル (⚙️)
         SETTINGS_ICON_BUTTON.addEventListener('click', () => {
