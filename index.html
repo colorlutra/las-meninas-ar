@@ -91,6 +91,10 @@
       #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
       #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
       
+      /* 新しいモード切替ボタン */
+      #mode-toggle-button { background-color: #28a745; flex-basis: calc(33% - 8px); } 
+
+      
       /* =================================================== */
       /* 3. 解説パネル (オーバーレイ) */
       /* =================================================== */
@@ -135,7 +139,7 @@
 
       <!-- A-Frameデフォルトカメラ (AR.jsがオーバーライドするが、look-controlsを明示的に無効化) -->
       <!-- ユーザーの操作やデバイスの傾きによる視点変更を防止し、完全に固定する -->
-      <a-entity camera look-controls="enabled: false" position="0 0 0"></a-entity>
+      <a-entity id="ar-camera" camera look-controls="enabled: false" position="0 0 0"></a-entity>
 
       <!-- 安定したジオメトリと位置 -->
       <!-- Z座標を-2.0に変更 (シンプル構造の最適値) -->
@@ -157,7 +161,8 @@
 
     <!-- UI: 設定パネル (詳細操作) -->
     <div id="settings-panel">
-      <!-- 1行目: ズーム -->
+      <!-- 1行目: モード切替とズーム -->
+      <button id="mode-toggle-button" class="setting-button">🔄 固定モード</button>
       <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
       <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
       
@@ -175,17 +180,20 @@
     <div id="explanation-panel">
       <h3>ラス・メニーナス (女官たち)</h3>
       <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
-      💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！</p>
+      💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！<br>
+      🔄 **モード切替**：カメラの固定（写真向け）と、スマホの動きに連動（臨場感向け）を切り替えられます。</p>
     </div>
 
     <script>
       // グローバル変数の設定
       const PAINTING_EL = document.getElementById('ar-painting');
+      const CAMERA_EL = document.getElementById('ar-camera'); // カメラエンティティを取得
       const INFO_PANEL = document.getElementById('explanation-panel');
       
       const SETTINGS_ICON_BUTTON = document.getElementById('settings-icon-button');
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
+      const MODE_TOGGLE_BUTTON = document.getElementById('mode-toggle-button'); // モード切替ボタンを取得
 
       // 初期値 (リセット用): Z軸を-2.0に変更
       const INITIAL_POSITION = { x: 0, y: 0.3, z: -2.0 }; 
@@ -250,6 +258,28 @@
         );
       }
 
+      // --- モード切替機能 ---
+      function toggleCameraMode() {
+        // look-controlsの状態を取得
+        const isEnabled = CAMERA_EL.getAttribute('look-controls').enabled;
+
+        // 状態を反転
+        const newEnabled = !isEnabled;
+        CAMERA_EL.setAttribute('look-controls', { enabled: newEnabled });
+
+        // ボタンのテキストを更新
+        if (newEnabled) {
+          MODE_TOGGLE_BUTTON.textContent = '🕹️ 臨場感モード';
+          MODE_TOGGLE_BUTTON.style.backgroundColor = '#ffc107'; // 黄色系
+          MODE_TOGGLE_BUTTON.style.color = '#333';
+        } else {
+          MODE_TOGGLE_BUTTON.textContent = '🔄 固定モード';
+          MODE_TOGGLE_BUTTON.style.backgroundColor = '#28a745'; // 緑色系
+          MODE_TOGGLE_BUTTON.style.color = 'white';
+        }
+      }
+
+
       // --- イベントリスナーの設定 ---
       document.addEventListener('DOMContentLoaded', () => {
         const zoomInButton = document.getElementById('zoom-in-button');
@@ -259,6 +289,11 @@
         const moveLeftButton = document.getElementById('move-left-button');
         const moveRightButton = document.getElementById('move-right-button');
         const resetButton = document.getElementById('reset-button');
+        
+        // 初期モードのボタン表示を設定
+        MODE_TOGGLE_BUTTON.textContent = '🔄 固定モード';
+        MODE_TOGGLE_BUTTON.style.backgroundColor = '#28a745';
+
 
         // 1. 設定パネル表示/非表示トグル (⚙️)
         SETTINGS_ICON_BUTTON.addEventListener('click', () => {
@@ -291,6 +326,9 @@
         moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
         moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
         
+        // モード切替
+        MODE_TOGGLE_BUTTON.addEventListener('click', toggleCameraMode);
+
         // リセット機能
         resetButton.addEventListener('click', resetPaintingPosition);
       });
