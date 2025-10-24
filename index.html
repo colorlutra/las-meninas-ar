@@ -67,11 +67,11 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 臨場感最大化のための設定: Y軸=高さの半分、Z軸=-3mで巨大化 -->
+      <!-- 臨場感最大化のための設定: Z軸を -1.5m に変更し、初期表示を確実に -->
       <a-entity
-        geometry="primitive: plane; height: 3.0; width: 1.383"  <!-- ★ 歪みを防ぐため、3.0m/2.169 = 1.383mで幅も拡大済み ★ -->
+        geometry="primitive: plane; height: 1.5; width: 0.6915"  <!-- ★ サイズを 1.5m に変更 (1.5/2.169 ≈ 0.6915) ★ -->
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 1.5 -3.0"    <!-- Y=1.5で絵の下端を床に合わせる -->
+        position="0 0.75 -1.5"    <!-- ★ 変更: Y=0.75 (下端を床に合わせる)、Z=-1.5 (距離) ★ -->
         rotation="0 0 0">
       </a-entity>
 
@@ -164,6 +164,7 @@
     </script>
   </body>
 </html>
+
 
 
 
