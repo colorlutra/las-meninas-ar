@@ -26,15 +26,17 @@
     <!-- 撮影ボタン -->
     <button id="screenshotBtn">📸 撮影</button>
 
-    <a-scene embedded 
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
-      vr-mode-ui="enabled: false">
+    <a-scene
+      embedded
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+      vr-mode-ui="enabled: false"
+      renderer="preserveDrawingBuffer: true">
 
       <a-assets>
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 画像比率：19.5:9（例：1688×3663）に合わせたサイズ -->
+      <!-- 画像比率：1688×3663（19.5:9）に合わせたサイズ -->
       <a-entity
         geometry="primitive: plane; height: 2.169; width: 1.0"
         material="src: #meninas; transparent: true; alphaTest: 0.05"
@@ -66,6 +68,7 @@
     </script>
   </body>
 </html>
+
 
 
 
