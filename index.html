@@ -60,7 +60,7 @@
   <body>
     <!-- ARシーン (マーカーレス) -->
     <a-scene embedded 
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
+      arjs="sourceType: webcam; trackingMethod: raw; debugUIEnabled: false;" <!-- ★ 変更点: trackingMethod を 'raw' に変更し、安定性を向上させる ★ -->
       vr-mode-ui="enabled: false">
 
       <a-assets>
@@ -69,9 +69,9 @@
 
       <!-- 臨場感最大化のための設定: Z軸を -1.5m に変更し、初期表示を確実に -->
       <a-entity
-        geometry="primitive: plane; height: 1.5; width: 0.6915"  <!-- ★ サイズを 1.5m に変更 (1.5/2.169 ≈ 0.6915) ★ -->
+        geometry="primitive: plane; height: 1.5; width: 0.6915"  <!-- サイズを 1.5m に変更 (1.5/2.169 ≈ 0.6915) -->
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.75 -1.5"    <!-- ★ 変更: Y=0.75 (下端を床に合わせる)、Z=-1.5 (距離) ★ -->
+        position="0 0.75 -1.5"    <!-- Y=0.75 (下端を床に合わせる)、Z=-1.5 (距離) -->
         rotation="0 0 0">
       </a-entity>
 
@@ -164,6 +164,7 @@
     </script>
   </body>
 </html>
+
 
 
 
