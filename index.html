@@ -92,12 +92,13 @@
       }
 
       /* 個別ボタンのスタイル */
-      #zoom-in-button, #zoom-out-button { background-color: #007bff; }
+      /* モード切替ボタンがなくなったため、レイアウト調整 */
+      #zoom-in-button, #zoom-out-button { background-color: #007bff; flex-basis: calc(50% - 4px); }
       #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
       #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
       
-      /* モード切替ボタン (パネル内) */
-      #mode-toggle-button { flex-basis: calc(33% - 8px); } 
+      /* パネル内のモード切替ボタンは削除されました */
+      /* #mode-toggle-button { flex-basis: calc(33% - 8px); } */ 
 
       
       /* =================================================== */
@@ -128,6 +129,8 @@
       #explanation-panel p {
         margin: 0;
         font-size: 14px;
+        /* 空行を表現するための追加スタイル */
+        line-height: 1.5; 
       }
     </style>
   </head>
@@ -166,8 +169,7 @@
 
     <!-- UI: 設定パネル (詳細操作) -->
     <div id="settings-panel">
-      <!-- 1行目: モード切替とズーム -->
-      <button id="mode-toggle-button" class="setting-button">🔄 固定モード</button>
+      <!-- 1行目: ズーム (2列に再配置) -->
       <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
       <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
       
@@ -181,12 +183,12 @@
       <button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
     </div>
 
-    <!-- UI: 解説パネル -->
+    <!-- UI: 解説パネル (テキストを整理) -->
     <div id="explanation-panel">
       <h3>ラス・メニーナス (女官たち)</h3>
-      <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
-      💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！<br>
-      🔄 **モード切替**：カメラの固定（写真向け）と、スマホの動きに連動（臨場感向け）を切り替えられます。</p>
+      <!-- 空行を表現するためにpタグを分ける -->
+      <p>作者: ディエゴ・ベラスケス (1656年頃)</p>
+      <p>💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！</p>
     </div>
 
     <script>
@@ -199,8 +201,8 @@
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
       
-      // モード切替ボタン (2種類)
-      const MODE_TOGGLE_BUTTON = document.getElementById('mode-toggle-button'); // パネル内の大きなボタン
+      // モード切替ボタン (アイコンのみ残る)
+      // const MODE_TOGGLE_BUTTON = document.getElementById('mode-toggle-button'); // パネル内のボタンは削除
       const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     // 初期表示のアイコン
 
       // 定義: モードごとの初期位置
@@ -278,28 +280,28 @@
         CAMERA_EL.setAttribute('look-controls', { enabled: newEnabled });
 
         // 2. 絵の位置の調整 (Z軸の変更)
-        const currentScale = PAINTING_EL.getAttribute('scale');
-        // 新しいモードに基づいてターゲット位置を選択
         const targetPosition = newEnabled ? IMMERSIVE_POSITION : FIXED_POSITION;
-        PAINTING_EL.setAttribute('position', targetPosition);
+        
+        // Note: スケールとX/Y軸の位置は現在の値を維持し、Z軸のみ変更
+        let currentPos = PAINTING_EL.getAttribute('position');
+        let currentScale = PAINTING_EL.getAttribute('scale');
 
-        // 3. ボタンのテキストと色の更新
-        const buttonText = newEnabled ? '🕹️ 臨場感モード' : '🔄 固定モード';
-        const bgColor = newEnabled ? '#ffc107' : '#28a745';
-        const textColor = newEnabled ? '#333' : 'white';
+        PAINTING_EL.setAttribute('position', { 
+            x: currentPos.x, 
+            y: currentPos.y, 
+            z: targetPosition.z // Z軸のみターゲットの位置を使用
+        });
+
+        // 3. アイコンのテキストと色の更新
         const iconBgColor = newEnabled ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)';
         const iconColor = newEnabled ? '#333' : 'white';
 
-
-        // パネル内のボタンを更新
-        MODE_TOGGLE_BUTTON.textContent = buttonText;
-        MODE_TOGGLE_BUTTON.style.backgroundColor = bgColor;
-        MODE_TOGGLE_BUTTON.style.color = textColor;
-        
         // アイコンを更新
         MODE_ICON_BUTTON.textContent = newEnabled ? '🕹️' : '🔄'; 
         MODE_ICON_BUTTON.style.backgroundColor = iconBgColor;
         MODE_ICON_BUTTON.style.color = iconColor;
+        
+        // パネル内のボタンは削除されたため、ここでの更新は不要
       }
 
 
@@ -314,13 +316,9 @@
         const resetButton = document.getElementById('reset-button');
         
         // 初期モードの設定 (固定モード)
-        // DOMContentLoaded時に一度実行し、ボタンの初期状態を反映させる
-        // look-controls="enabled: false" が初期値なので、それに合わせた表示にする
-        // toggleCameraModeが初期化も兼ねるため、初期状態の表示を確定させる
-        MODE_TOGGLE_BUTTON.textContent = '🔄 固定モード';
-        MODE_TOGGLE_BUTTON.style.backgroundColor = '#28a745';
         MODE_ICON_BUTTON.textContent = '🔄';
         MODE_ICON_BUTTON.style.backgroundColor = 'rgba(40, 167, 69, 0.8)';
+
 
         // 1. 設定パネル表示/非表示トグル (⚙️)
         SETTINGS_ICON_BUTTON.addEventListener('click', () => {
@@ -353,8 +351,7 @@
         moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
         moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
         
-        // モード切替 (アイコンとパネル内の両方にリスナーを設定)
-        MODE_TOGGLE_BUTTON.addEventListener('click', toggleCameraMode);
+        // モード切替 (アイコンのみにリスナーを設定)
         MODE_ICON_BUTTON.addEventListener('click', toggleCameraMode);
 
 
