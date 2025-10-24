@@ -57,7 +57,9 @@
             const link = document.createElement('a');
             link.href = image;
             link.download = 'ar_screenshot.png';
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
           } catch (e) {
             alert("スクリーンショットに失敗しました。HTTPS環境でお試しください。");
           }
@@ -68,6 +70,7 @@
     </script>
   </body>
 </html>
+
 
 
 
