@@ -92,14 +92,10 @@
       }
 
       /* 個別ボタンのスタイル */
-      /* モード切替ボタンがなくなったため、レイアウト調整 */
       #zoom-in-button, #zoom-out-button { background-color: #007bff; flex-basis: calc(50% - 4px); }
       #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
       #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
       
-      /* パネル内のモード切替ボタンは削除されました */
-      /* #mode-toggle-button { flex-basis: calc(33% - 8px); } */ 
-
       
       /* =================================================== */
       /* 3. 解説パネル (オーバーレイ) */
@@ -146,8 +142,9 @@
       </a-assets>
 
       <!-- A-Frameデフォルトカメラ -->
+      <!-- ar-paintingはカメラの子ではない（ワールド座標に固定） -->
       <a-entity id="ar-camera" camera look-controls="enabled: false" position="0 0 0"></a-entity>
-
+      
       <!-- 安定したジオメトリと位置 -->
       <a-entity id="ar-painting"
         geometry="primitive: plane; height: 2.169; width: 1.0"  
@@ -205,6 +202,7 @@
       const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     // 初期表示のアイコン
 
       // 定義: モードごとの初期位置
+      // ar-paintingがカメラの子ではないため、これらの座標はワールド座標となる
       const FIXED_POSITION = { x: 0, y: 0.3, z: -2.0 };     // 固定モード (撮影向け): 近い位置
       const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -4.0 };   // 臨場感モード (没入向け): 遠い位置
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
@@ -257,20 +255,20 @@
           newY = currentPos.y + step;
         }
         
+        // Z軸は移動させない
         updatePaintingTransform({x: newX, y: newY, z: newZ}, currentScale);
       }
       
-      // --- リセット機能 ---
+      // --- リセット機能 (ワールド座標の原点正面にリセット) ---
       function resetPaintingPosition() {
-        // 現在のZ軸位置を取得 (モードによって異なる)
-        const currentZ = PAINTING_EL.getAttribute('position').z;
-        // 固定モードの初期Z位置、または臨場感モードの初期Z位置に戻す
-        // XとY軸は0に戻し、カメラの真正面に配置する
-        const targetZ = CAMERA_EL.getAttribute('look-controls').enabled ? IMMERSIVE_POSITION.z : FIXED_POSITION.z;
+        // look-controlsが有効か（臨場感モードか）でZ軸の初期位置を決定
+        const isImmersiveMode = CAMERA_EL.getAttribute('look-controls').enabled;
+        const targetZ = isImmersiveMode ? IMMERSIVE_POSITION.z : FIXED_POSITION.z;
 
+        // X=0, Y=初期の高さ, Z=モードに応じた距離 に設定 (ワールド座標)
         updatePaintingTransform(
           {
-            x: 0, // X軸を中央に
+            x: 0, // ワールド中央のX軸にリセット
             y: FIXED_POSITION.y, // Y軸は初期の高さにリセット
             z: targetZ // Z軸は現在のモードの初期距離にリセット
           },
@@ -288,16 +286,17 @@
         CAMERA_EL.setAttribute('look-controls', { enabled: newEnabled });
 
         // 2. 絵の位置の調整 (Z軸の変更)
-        const targetPosition = newEnabled ? IMMERSIVE_POSITION : FIXED_POSITION;
+        // ワールド座標なので、Z軸のみ変更する
+        const targetPositionZ = newEnabled ? IMMERSIVE_POSITION.z : FIXED_POSITION.z;
         
-        // Note: スケールとX/Y軸の位置は現在の値を維持し、Z軸のみ変更
+        // Note: X/Y軸の位置とスケールは現在の値を維持し、Z軸のみ変更
         let currentPos = PAINTING_EL.getAttribute('position');
         let currentScale = PAINTING_EL.getAttribute('scale');
 
         PAINTING_EL.setAttribute('position', { 
             x: currentPos.x, 
             y: currentPos.y, 
-            z: targetPosition.z // Z軸のみターゲットの位置を使用
+            z: targetPositionZ // Z軸のみターゲットの位置を使用
         });
 
         // 3. アイコンのテキストと色の更新
