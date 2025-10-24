@@ -2,41 +2,51 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ラス・メニーナス AR (操作性改善版)</title>
+    <title>ラス・メニーナス AR (最終操作性改善版)</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
       
-      /* 全てのボタンのコンテナ */
+      /* =================================================== */
+      /* コントロールパネルのレイアウト改善 */
+      /* =================================================== */
       #control-panel {
+        /* 画面左右に固定し、自動で幅を調整 */
         position: fixed;
         bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 10px; 
+        right: 10px;
         z-index: 999;
+        
         display: flex;
-        flex-wrap: wrap; 
-        justify-content: center;
-        gap: 10px; /* スペースを少し広げた */
-        max-width: 95vw;
+        flex-wrap: wrap; /* 画面幅に合わせて折り返し */
+        justify-content: space-around; /* ボタンを均等に配置 */
+        gap: 8px; /* ボタン間の間隔 */
+        
+        /* 装飾 */
         padding: 10px;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-radius: 12px; /* 角丸を少し大きく */
-        transition: opacity 0.3s ease; /* 非表示時のアニメーション */
+        background-color: rgba(0, 0, 0, 0.75); /* 背景を濃くした */
+        border-radius: 12px; 
+        box-sizing: border-box; /* paddingとborderをwidthに含める */
+        transition: opacity 0.3s ease;
       }
       
       /* ボタンの共通スタイル */
       .ar-button {
-        padding: 12px 18px; /* パディングを大きくしてタッチエリアを確保 */
+        /* flex-basis: ボタンが占める最小幅を指定（全体の約1/3〜1/4に調整） */
+        flex-basis: calc(33% - 8px); 
+        min-width: 90px; /* 小さすぎるのを防ぐ */
+        padding: 12px 10px; 
         color: white;
         border: none;
-        border-radius: 25px; /* 角丸を大きく */
-        font-size: 15px; /* フォントサイズを大きく */
+        border-radius: 25px; 
+        font-size: 14px; 
         font-weight: bold;
+        text-align: center;
         cursor: pointer;
-        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4); /* シャドウを強めた */
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4); 
         transition: background-color 0.2s, transform 0.1s;
       }
       .ar-button:active {
@@ -45,12 +55,12 @@
       }
 
       /* 個別ボタンのスタイル */
-      #zoom-in-button, #zoom-out-button { background-color: #007bff; } /* 青 */
-      #move-up-button, #move-down-button { background-color: #ffc107; color: #333; } /* 黄 */
-      #move-left-button, #move-right-button { background-color: #28a745; } /* 緑 */
-      #info-toggle-button { background-color: #6f42c1; } /* 紫 */
-      #capture-button { background-color: #dc3545; } /* 赤 */
-      /* 新しい操作パネル切り替えボタン */
+      #zoom-in-button, #zoom-out-button { background-color: #007bff; }
+      #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
+      #info-toggle-button { background-color: #6f42c1; flex-basis: 45%; } /* 解説ボタンは幅広に */
+      #capture-button { background-color: #dc3545; flex-grow: 1; } /* 撮影ボタンは行いっぱいを使う */
+
+      /* 操作パネル表示/非表示トグルボタン */
       #panel-toggle-button {
         position: fixed;
         bottom: 10px;
@@ -59,12 +69,15 @@
         background-color: rgba(100, 100, 100, 0.8);
         color: white;
         padding: 10px 15px;
-        border-radius: 50%; /* 丸型ボタン */
+        border-radius: 50%; 
         font-size: 20px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        border: none;
+        cursor: pointer;
       }
-
-      /* 解説パネルのスタイル (変更なし) */
+      /* =================================================== */
+      /* その他パネル (変更なし) */
+      /* =================================================== */
       #explanation-panel {
         position: fixed;
         top: 20px;
@@ -91,7 +104,6 @@
         margin: 0;
         font-size: 14px;
       }
-       /* 操作案内メッセージボックスのスタイル (変更なし) */
       #info-box {
         position: fixed;
         top: 50%;
@@ -124,11 +136,11 @@
       vr-mode-ui="enabled: false">
 
       <a-assets>
+        <!-- 注: 画像アセットは、ユーザーの環境でアクセス可能なlasmeninas_transparent.pngに依存します。 -->
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
       <!-- 絵画エンティティ: AR空間に固定し、JSで位置を操作する -->
-      <!-- 初期設定: height: 2.5, width: 1.152, position="0 1.25 -2.0" -->
       <a-entity id="ar-painting"
         geometry="primitive: plane; height: 2.5; width: 1.152"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
@@ -139,26 +151,24 @@
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- コントロールパネル -->
+    <!-- コントロールパネル (ボタンの表示順序を調整し、配置を最適化) -->
     <div id="control-panel">
-      <!-- ズーム操作 -->
+      <!-- ズーム操作 (1行目: ズーム) -->
       <button id="zoom-in-button" class="ar-button">➕ ズーム</button>
       <button id="zoom-out-button" class="ar-button">➖ 縮小</button>
       
-      <!-- 移動操作 -->
+      <!-- 移動操作 (2行目: 上下左右) -->
       <button id="move-up-button" class="ar-button">⬆️ 上へ</button>
       <button id="move-down-button" class="ar-button">⬇️ 下へ</button>
       <button id="move-left-button" class="ar-button">⬅️ 左へ</button>
       <button id="move-right-button" class="ar-button">➡️ 右へ</button>
 
-      <!-- 解説表示 -->
+      <!-- アクションボタン (3行目: 解説, 撮影) -->
       <button id="info-toggle-button" class="ar-button">💡 解説</button>
-
-      <!-- 撮影機能 (AR必須のため復活) -->
       <button id="capture-button" class="ar-button">📸 撮影・保存</button>
     </div>
 
-    <!-- 操作パネル表示/非表示トグルボタン (常に表示) -->
+    <!-- 操作パネル表示/非表示トグルボタン -->
     <button id="panel-toggle-button" class="ar-button">⚙️</button>
 
 
@@ -184,8 +194,8 @@
       const PAINTING_EL = document.getElementById('ar-painting');
       const INFO_PANEL = document.getElementById('explanation-panel');
       const INFO_BOX = document.getElementById('info-box');
-      const CONTROL_PANEL = document.getElementById('control-panel'); // 新しく追加
-      const PANEL_TOGGLE_BUTTON = document.getElementById('panel-toggle-button'); // 新しく追加
+      const CONTROL_PANEL = document.getElementById('control-panel');
+      const PANEL_TOGGLE_BUTTON = document.getElementById('panel-toggle-button');
 
 
       // 状態管理
@@ -216,11 +226,6 @@
 
       /**
        * ARエンティティの位置とサイズを一括で更新する
-       * @param {number} x - X軸 (左右)
-       * @param {number} y - Y軸 (上下)
-       * @param {number} z - Z軸 (前後/ズーム)
-       * @param {number} h - Height (高さ)
-       * @param {number} w - Width (幅)
        */
       function updatePaintingTransform(x, y, z, h, w) {
           PAINTING_EL.setAttribute('position', { x: x, y: y, z: z });
@@ -230,25 +235,22 @@
       // --- ズーム機能 (Z軸操作) ---
       function zoom(direction) {
         let currentPos = PAINTING_EL.getAttribute('position');
-        let currentGeom = PAINTING_EL.getAttribute('geometry');
         
         let newZ;
         if (direction === 'in') {
-          newZ = Math.min(MAX_Z, currentPos.z + ZOOM_FACTOR); // Z軸を0に近づける
+          newZ = Math.min(MAX_Z, currentPos.z + ZOOM_FACTOR); 
         } else {
-          newZ = Math.max(MIN_Z, currentPos.z - ZOOM_FACTOR); // Z軸を遠ざける
+          newZ = Math.max(MIN_Z, currentPos.z - ZOOM_FACTOR); 
         }
 
-        // ズーム（Z軸）が移動したら、それに合わせてサイズとY軸（床合わせ）も変更する
         if (newZ !== currentPos.z) {
           // Z軸を基準に新しいスケールを計算（-2.0mが基準スケール1.0）
-          // スケールはZ軸の絶対値に反比例させると自然
           currentScale = Math.abs(2.0 / newZ);
 
           const newH = initialHeight * currentScale;
           const newW = initialWidth * currentScale;
           
-          // Y軸も新しい高さに合わせて調整 (newH / 2)
+          // Y軸も新しい高さに合わせて調整 (床合わせ)
           updatePaintingTransform(currentPos.x, newH / 2, newZ, newH, newW);
         }
       }
@@ -256,20 +258,18 @@
       // --- 移動機能 (X, Y軸操作) ---
       function move(axis, step) {
         let currentPos = PAINTING_EL.getAttribute('position');
+        let currentGeom = PAINTING_EL.getAttribute('geometry');
         
         let newX = currentPos.x;
         let newY = currentPos.y;
-        let newZ = currentPos.z;
-        let currentGeom = PAINTING_EL.getAttribute('geometry');
 
         if (axis === 'X') {
           newX = currentPos.x + step;
         } else if (axis === 'Y') {
-          // Y軸の移動は、初期の床合わせ位置 (currentGeom.height / 2) を基準とする
           newY = currentPos.y + step;
         }
 
-        updatePaintingTransform(newX, newY, newZ, currentGeom.height, currentGeom.width);
+        updatePaintingTransform(newX, newY, currentPos.z, currentGeom.height, currentGeom.width);
       }
       
       // --- 撮影機能 ---
@@ -282,12 +282,11 @@
 
         if (wasPanelVisible) {
           CONTROL_PANEL.style.display = 'none';
-          PANEL_TOGGLE_BUTTON.style.display = 'none'; // トグルボタンも隠す
+          PANEL_TOGGLE_BUTTON.style.display = 'none'; 
         }
         if (wasInfoPanelVisible) {
           INFO_PANEL.style.display = 'none';
         }
-
 
         if (!sceneCanvas) {
           console.error('Canvas not found.');
@@ -331,7 +330,6 @@
 
           } catch (error) {
             console.error('Error during screenshot capture or download:', error);
-            // エラーが発生した場合も、ネイティブSSを促すメッセージボックスを表示
             INFO_BOX.innerHTML = `撮影に失敗しました。<br><hr style="margin: 10px 0; border-color: #555;">**【重要】** スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。`;
             INFO_BOX.style.display = 'block';
             setTimeout(() => { INFO_BOX.style.display = 'none'; }, 6000);
@@ -345,7 +343,7 @@
                 INFO_PANEL.style.display = 'block';
              }
           }
-        }, 100); // わずかな遅延を入れてUI非表示を確実に反映させる
+        }, 100); 
       }
 
       // --- パネル表示/非表示切り替え機能 ---
@@ -358,8 +356,8 @@
         } else {
           // 非表示にする
           CONTROL_PANEL.style.display = 'none';
-          PANEL_TOGGLE_BUTTON.textContent = '📷'; // カメラアイコンに変更
-          PANEL_TOGGLE_BUTTON.style.backgroundColor = '#dc3545'; // 赤色に変更
+          PANEL_TOGGLE_BUTTON.textContent = '📷'; 
+          PANEL_TOGGLE_BUTTON.style.backgroundColor = '#dc3545'; 
         }
       }
 
@@ -406,6 +404,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
