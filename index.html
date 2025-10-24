@@ -2,126 +2,31 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (究極のシンプル構造)</title>
-    
+    <title>Las Meninas AR (マーカー方式・臨場感版)</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      
-      /* 撮影ボタンのスタイル */
-      #capture-button {
-        position: fixed;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 999; 
-        padding: 15px 30px;
-        background-color: #4CAF50; /* 緑 */
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        transition: background-color 0.3s;
-      }
-      #capture-button:active {
-        background-color: #45a049;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-      }
     </style>
   </head>
   <body>
-    <!-- ARシーン -->
     <a-scene embedded 
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
+      arjs="sourceType: webcam; detectionMode: mono; patternRatio: 0.5; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
       <a-assets>
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 安定したジオメトリと位置 -->
-      <a-entity
-        geometry="primitive: plane; height: 2.169; width: 1.0"  
-        material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -2"
-        rotation="0 0 0">
-      </a-entity>
+      <a-marker type='hiro'>
+        <a-entity
+          geometry="primitive: plane; height: 2.169; width: 1.0"  material="src: #meninas; transparent: true; alphaTest: 0.05"
+          position="0 1.0845 0"    rotation="0 0 0">
+        </a-entity>
+      </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
-
-    <!-- 撮影ボタン -->
-    <button id="capture-button">📸 撮影・保存</button>
-
-    <script>
-      /**
-       * dataURLをバイナリデータに変換し、ファイルとして強制ダウンロードさせる関数。
-       */
-      function dataURLtoBlob(dataurl) {
-        let arr = dataurl.split(','), 
-            mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), 
-            n = bstr.length, 
-            u8arr = new Uint8Array(n);
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new Blob([u8arr], {type:mime});
-      }
-
-      function captureScreenshotAndDownload() {
-        const scene = document.querySelector('a-scene');
-        
-        if (!scene || !scene.components.screenshot) {
-          console.error('A-Frame screenshot component not found.');
-          return;
-        }
-
-        // A-Frameのスクリーンショット機能でJPEG画像データを取得
-        // format: 'jpg'に変更し、画質を1.0 (最高) に設定
-        scene.components.screenshot.capture('perspective', 'jpg', 1.0).then(dataURL => {
-          if (!dataURL || dataURL === 'data:,') {
-            console.error('Failed to capture screenshot data.');
-            alert('スクリーンショットの取得に失敗しました。');
-            return;
-          }
-
-          // 1. dataURLをBlob（バイナリデータ）に変換
-          const blob = dataURLtoBlob(dataURL);
-          
-          // 2. Blobから一時的なURLを作成
-          const blobUrl = URL.createObjectURL(blob);
-
-          // 3. ダウンロード用のリンク要素を一時的に作成し、ダウンロードを実行
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          
-          const date = new Date().toISOString().slice(0, 10);
-          link.download = `las-meninas-ar-${date}.jpg`; // 拡張子をjpgに変更
-
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          // 4. 一時URLを解放
-          URL.revokeObjectURL(blobUrl);
-
-        }).catch(error => {
-          console.error('Error capturing screenshot:', error);
-          alert('スクリーンショットの取得中にエラーが発生しました。');
-        });
-      }
-
-      // ボタンにイベントリスナーを設定
-      document.addEventListener('DOMContentLoaded', () => {
-        const button = document.getElementById('capture-button');
-        button.addEventListener('click', captureScreenshotAndDownload);
-      });
-    </script>
   </body>
 </html>
 
