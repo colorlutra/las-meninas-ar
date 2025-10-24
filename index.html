@@ -49,23 +49,25 @@
 
     <script>
       document.getElementById('screenshotBtn').addEventListener('click', () => {
-        const scene = document.querySelector('a-scene');
-        const canvas = scene.renderer && scene.renderer.domElement;
-        if (canvas) {
-          try {
-            const image = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = 'ar_screenshot.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          } catch (e) {
-            alert("スクリーンショットに失敗しました。HTTPS環境でお試しください。");
+        setTimeout(() => {
+          const scene = document.querySelector('a-scene');
+          const canvas = scene.renderer && scene.renderer.domElement;
+          if (canvas) {
+            try {
+              const image = canvas.toDataURL('image/png');
+              const link = document.createElement('a');
+              link.href = image;
+              link.download = 'ar_screenshot.png';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            } catch (e) {
+              alert("スクリーンショットに失敗しました。ブラウザの制限かもしれません。");
+            }
+          } else {
+            alert("canvasが見つかりませんでした。");
           }
-        } else {
-          alert("canvasが見つかりませんでした。");
-        }
+        }, 800); // 0.8秒遅延で描画完了を待つ
       });
     </script>
   </body>
