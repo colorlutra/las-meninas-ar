@@ -202,7 +202,6 @@
       const SETTINGS_PANEL = document.getElementById('settings-panel');
       
       // モード切替ボタン (アイコンのみ残る)
-      // const MODE_TOGGLE_BUTTON = document.getElementById('mode-toggle-button'); // パネル内のボタンは削除
       const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     // 初期表示のアイコン
 
       // 定義: モードごとの初期位置
@@ -263,9 +262,18 @@
       
       // --- リセット機能 ---
       function resetPaintingPosition() {
-        // 固定モードの初期位置に戻す
+        // 現在のZ軸位置を取得 (モードによって異なる)
+        const currentZ = PAINTING_EL.getAttribute('position').z;
+        // 固定モードの初期Z位置、または臨場感モードの初期Z位置に戻す
+        // XとY軸は0に戻し、カメラの真正面に配置する
+        const targetZ = CAMERA_EL.getAttribute('look-controls').enabled ? IMMERSIVE_POSITION.z : FIXED_POSITION.z;
+
         updatePaintingTransform(
-          FIXED_POSITION,
+          {
+            x: 0, // X軸を中央に
+            y: FIXED_POSITION.y, // Y軸は初期の高さにリセット
+            z: targetZ // Z軸は現在のモードの初期距離にリセット
+          },
           INITIAL_SCALE
         );
       }
@@ -300,8 +308,6 @@
         MODE_ICON_BUTTON.textContent = newEnabled ? '🕹️' : '🔄'; 
         MODE_ICON_BUTTON.style.backgroundColor = iconBgColor;
         MODE_ICON_BUTTON.style.color = iconColor;
-        
-        // パネル内のボタンは削除されたため、ここでの更新は不要
       }
 
 
