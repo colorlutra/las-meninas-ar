@@ -133,6 +133,10 @@
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
+      <!-- A-Frameデフォルトカメラ (AR.jsがオーバーライドするが、look-controlsを明示的に無効化) -->
+      <!-- ユーザーの操作やデバイスの傾きによる視点変更を防止し、完全に固定する -->
+      <a-entity camera look-controls="enabled: false" position="0 0 0"></a-entity>
+
       <!-- 安定したジオメトリと位置 -->
       <!-- Z座標を-2.0に変更 (シンプル構造の最適値) -->
       <a-entity id="ar-painting"
