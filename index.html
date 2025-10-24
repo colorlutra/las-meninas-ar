@@ -2,299 +2,49 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ラス・メニーナス AR (サイズ修正版)</title>
+    <title>ラス・メニーナス AR (究極のシンプル構成)</title>
     
     <!-- A-FrameとAR.jsの読み込み -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     
     <style>
+      /* 画面いっぱいに表示するためのスタイル */
       body { margin: 0; overflow: hidden; }
-      
-      /* =================================================== */
-      /* 1. 初期表示アイコン (右下) */
-      /* =================================================== */
-      #initial-buttons-container {
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column; /* 縦並び */
-        gap: 10px;
-      }
-      
-      .initial-icon-button {
-        background-color: rgba(100, 100, 100, 0.8);
-        color: white;
-        padding: 15px; 
-        border-radius: 50%;
-        font-size: 24px;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-        transition: background-color 0.2s;
-        width: 60px;
-        height: 60px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      #info-icon-button { 
-        background-color: rgba(111, 66, 193, 0.8); /* 紫色 */
-      }
-
-      /* =================================================== */
-      /* 2. 設定パネル (オーバーレイ) */
-      /* =================================================== */
-      #settings-panel {
-        position: fixed;
-        bottom: 10px;
-        left: 10px;
-        right: 10px;
-        z-index: 999;
-        display: none; /* 初期は非表示 */
-        flex-wrap: wrap; 
-        justify-content: space-around; 
-        gap: 8px; 
-        padding: 10px;
-        background-color: rgba(0, 0, 0, 0.85);
-        border-radius: 12px; 
-        box-sizing: border-box; 
-      }
-      
-      .setting-button {
-        /* 3列レイアウトを維持 */
-        flex-basis: calc(33% - 8px); 
-        min-width: 90px; 
-        padding: 12px 10px; 
-        color: white;
-        border: none;
-        border-radius: 25px; 
-        font-size: 14px; 
-        font-weight: bold;
-        text-align: center;
-        cursor: pointer;
-        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4); 
-        transition: background-color 0.2s, transform 0.1s;
-      }
-      .setting-button:active {
-        transform: translateY(1px);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-      }
-
-      /* 個別ボタンのスタイル */
-      #zoom-in-button, #zoom-out-button { background-color: #007bff; }
-      #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
-      #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
-
-      /* =================================================== */
-      /* 3. 解説パネル (オーバーレイ) */
-      /* =================================================== */
-      #explanation-panel {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(255, 255, 255, 0.95);
-        color: #333;
-        padding: 15px 25px;
-        border-radius: 8px;
-        z-index: 998;
-        text-align: center;
-        width: 80%;
-        max-width: 400px;
-        pointer-events: auto;
-        display: none; /* 初期は非表示 */
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      }
-      #explanation-panel h3 {
-        margin: 0 0 5px 0;
-        font-size: 20px;
-        color: #6f42c1;
-      }
-      #explanation-panel p {
-        margin: 0;
-        font-size: 14px;
-      }
     </style>
   </head>
   <body>
 
-    <!-- A-FRAME AR SCENE -->
+    <!-- A-FRAME AR SCENE: AR.jsの最小構成でシーンを作成 -->
     <a-scene embedded 
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
+      arjs="sourceType: webcam; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
-
+      
+      <!-- 画像アセットの読み込み -->
       <a-assets>
+        <!-- lasmeninas_transparent.pngがAR空間に表示する画像です -->
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
+      <!-- ARエンティティ (絵画) の設定 -->
       <a-entity id="ar-painting"
-        <!-- geometryは固定し、scaleでズームを制御する -->
+        <!-- ジオメトリ（形）: 平面 (元の絵画の縦横比 2.169:1.0 を使用) -->
         geometry="primitive: plane; height: 2.169; width: 1.0"  
+        <!-- マテリアル: 読み込んだ画像を設定し、背景透過を有効にする -->
         material="src: #meninas; transparent: true; alphaTest: 0.05"
+        <!-- 位置: カメラから見て手前 (Z:-2.0) かつ少し持ち上げた位置 (Y:0.3) に配置 -->
         position="0 0.3 -2"    
+        <!-- 回転: 初期値は回転なし -->
         rotation="0 0 0"
-        scale="1 1 1"> <!-- scaleの初期値を追加 -->
+        <!-- スケール: 初期値は原寸大 (1 1 1) -->
+        scale="1 1 1">
       </a-entity>
-
-      <a-entity camera></a-entity>
+      
+      <!-- AR.jsがカメラを自動的に設定するため、a-entity cameraは削除しました -->
+      
     </a-scene>
 
-    <!-- UI: 右下のアイコンコンテナ -->
-    <div id="initial-buttons-container">
-      <button id="settings-icon-button" class="initial-icon-button">⚙️</button>
-      <button id="info-icon-button" class="initial-icon-button">💡</button>
-    </div>
+    <!-- 複雑なUIとJavaScriptを全て削除し、シンプルさを追求しました -->
 
-    <!-- UI: 設定パネル (詳細操作) -->
-    <div id="settings-panel">
-      <!-- 1行目: ズーム -->
-      <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
-      <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
-      
-      <!-- 2行目: 上下左右 -->
-      <button id="move-up-button" class="setting-button">⬆️ 上へ</button>
-      <button id="move-down-button" class="setting-button">⬇️ 下へ</button>
-      <button id="move-left-button" class="setting-button">⬅️ 左へ</button>
-      <button id="move-right-button" class="setting-button">➡️ 右へ</button>
-
-      <!-- 3行目: リセット -->
-      <button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
-    </div>
-
-    <!-- UI: 解説パネル -->
-    <div id="explanation-panel">
-      <h3>ラス・メニーナス (女官たち)</h3>
-      <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
-      場所: スペイン・プラド美術館<br>
-      鏡の反射や、画家自身が描かれている点が複雑な構図を生み出しています。<br><br>
-      💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、人が映り込むトリックアートを完成させよう！</p>
-    </div>
-
-
-    <script>
-      // グローバル変数の設定
-      const PAINTING_EL = document.getElementById('ar-painting');
-      const INFO_PANEL = document.getElementById('explanation-panel');
-      
-      const SETTINGS_ICON_BUTTON = document.getElementById('settings-icon-button');
-      const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
-      const SETTINGS_PANEL = document.getElementById('settings-panel');
-
-      // ユーザー提供のA-Frameコードから初期値を設定 (リセット用)
-      const INITIAL_POSITION = { x: 0, y: 0.3, z: -2.0 }; // ユーザーのコードのposition="0 0.3 -2"
-      const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         // scale="1 1 1"
-      
-      // 定数
-      const ZOOM_STEP = 0.5;   // スケール変更のステップ
-      const MOVE_STEP = 0.2;   // 移動のステップ (m単位)
-      const MAX_SCALE = 5.0;   // 最大スケール
-      const MIN_SCALE = 0.5;   // 最小スケール
-
-      /**
-       * ARエンティティの位置とスケールを一括で更新する
-       */
-      function updatePaintingTransform(position, scale) {
-          PAINTING_EL.setAttribute('position', position);
-          PAINTING_EL.setAttribute('scale', scale);
-      }
-
-      // --- ズーム機能 (Scale操作) ---
-      function zoom(direction) {
-        let currentScale = PAINTING_EL.getAttribute('scale');
-        
-        let newScaleValue;
-        if (direction === 'in') {
-          newScaleValue = Math.min(MAX_SCALE, currentScale.x + ZOOM_STEP); 
-        } else {
-          newScaleValue = Math.max(MIN_SCALE, currentScale.x - ZOOM_STEP); 
-        }
-
-        if (newScaleValue !== currentScale.x) {
-          const newScale = { x: newScaleValue, y: newScaleValue, z: newScaleValue };
-          let currentPos = PAINTING_EL.getAttribute('position');
-          
-          updatePaintingTransform(currentPos, newScale);
-        }
-      }
-
-      // --- 移動機能 (X, Y軸操作) ---
-      function move(axis, step) {
-        let currentPos = PAINTING_EL.getAttribute('position');
-        let currentScale = PAINTING_EL.getAttribute('scale');
-        
-        let newX = currentPos.x;
-        let newY = currentPos.y;
-        let newZ = currentPos.z;
-
-        if (axis === 'X') {
-          newX = currentPos.x + step;
-        } else if (axis === 'Y') {
-          newY = currentPos.y + step;
-        } else if (axis === 'Z') {
-          // Z軸移動はスケールと関係ないため、単純な加算
-          newZ = currentPos.z + step;
-        }
-
-        updatePaintingTransform({x: newX, y: newY, z: newZ}, currentScale);
-      }
-      
-      // --- リセット機能 ---
-      function resetPaintingPosition() {
-        updatePaintingTransform(
-          INITIAL_POSITION,
-          INITIAL_SCALE
-        );
-      }
-
-      // --- イベントリスナーの設定 ---
-      document.addEventListener('DOMContentLoaded', () => {
-        const zoomInButton = document.getElementById('zoom-in-button');
-        const zoomOutButton = document.getElementById('zoom-out-button');
-        const moveUpButton = document.getElementById('move-up-button');
-        const moveDownButton = document.getElementById('move-down-button');
-        const moveLeftButton = document.getElementById('move-left-button');
-        const moveRightButton = document.getElementById('move-right-button');
-        const resetButton = document.getElementById('reset-button');
-
-        // 1. 設定パネル表示/非表示トグル (⚙️)
-        SETTINGS_ICON_BUTTON.addEventListener('click', () => {
-          const isVisible = SETTINGS_PANEL.style.display === 'flex';
-          SETTINGS_PANEL.style.display = isVisible ? 'none' : 'flex'; 
-          
-          // 設定パネル表示中は解説パネルを非表示にする
-          if (!isVisible) {
-            INFO_PANEL.style.display = 'none'; 
-            INFO_ICON_BUTTON.textContent = '💡';
-          }
-        });
-
-        // 2. 解説パネル表示/非表示トグル (💡)
-        INFO_ICON_BUTTON.addEventListener('click', () => {
-          const isVisible = INFO_PANEL.style.display === 'block';
-          INFO_PANEL.style.display = isVisible ? 'none' : 'block';
-          INFO_ICON_BUTTON.textContent = isVisible ? '💡' : '💡 (閉じる)';
-
-          // 解説パネル表示中は設定パネルを非表示にする
-          if (!isVisible) {
-            SETTINGS_PANEL.style.display = 'none';
-          }
-        });
-
-        // 3. 設定パネル内の機能
-        zoomInButton.addEventListener('click', () => zoom('in'));
-        zoomOutButton.addEventListener('click', () => zoom('out'));
-        // Y軸とX軸の移動
-        moveUpButton.addEventListener('click', () => move('Y', MOVE_STEP));
-        moveDownButton.addEventListener('click', () => move('Y', -MOVE_STEP));
-        moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
-        moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
-        
-        // リセット機能
-        resetButton.addEventListener('click', resetPaintingPosition);
-      });
-    </script>
   </body>
 </html>
