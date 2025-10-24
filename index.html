@@ -2,31 +2,321 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (究極のシンプル構造)</title>
+    <title>Las Meninas AR (面白機能強化版)</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      /* 安定化CSSは含まない */
+      
+      /* 全てのボタンのコンテナ */
+      #control-panel {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        display: flex;
+        flex-wrap: wrap; /* ボタンが多いため折り返しを許可 */
+        justify-content: center;
+        gap: 10px; /* ボタン間のスペースを少し狭く */
+      }
+      
+      /* ボタンの共通スタイル */
+      .ar-button {
+        padding: 12px 18px; /* パディングを少し調整 */
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: background-color 0.3s, transform 0.1s;
+      }
+      .ar-button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      /* 個別ボタンのスタイル */
+      #capture-button { background-color: #4CAF50; } /* 緑 */
+      #zoom-in-button { background-color: #007bff; } /* 青 */
+      #zoom-out-button { background-color: #ffc107; color: #333; } /* 黄 */
+      #info-toggle-button { background-color: #6f42c1; } /* 紫 */
+      #shake-button { background-color: #dc3545; } /* 赤 (新規) */
+
+      /* 操作案内のメッセージボックスのスタイル */
+      #info-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(43, 43, 43, 0.95); 
+        color: white;
+        padding: 25px 35px;
+        border-radius: 12px;
+        z-index: 1000;
+        text-align: center;
+        display: none; 
+        font-size: 16px;
+        max-width: 80%;
+        line-height: 1.6;
+      }
+      #info-box strong {
+        color: #ffcc00; 
+        font-size: 18px;
+        display: block;
+        margin-top: 5px;
+      }
+
+      /* 解説パネルのスタイル */
+      #explanation-panel {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.75); 
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        z-index: 998;
+        text-align: center;
+        width: 80%;
+        max-width: 400px;
+        pointer-events: none;
+        display: none; 
+      }
+      #explanation-panel h3 {
+        margin: 0 0 5px 0;
+        font-size: 20px;
+        color: #ffdd55;
+      }
+      #explanation-panel p {
+        margin: 0;
+        font-size: 14px;
+      }
     </style>
   </head>
   <body>
+    <!-- ARシーン (マーカーレス) -->
     <a-scene embedded 
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
+      arjs="sourceType: webcam; trackingMethod: raw; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
       <a-assets>
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <a-entity
-        geometry="primitive: plane; height: 2.169; width: 1.0"  material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -2"    rotation="0 0 0">
+      <!-- 美調節設定 (IDを付与) -->
+      <a-entity id="ar-painting"
+        geometry="primitive: plane; height: 2.5; width: 1.152"  
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 1.25 -2.0"    <!-- Y=1.25, Z=-2.0 -->
+        rotation="0 0 0">
+        
+        <!-- A-Frame Animation Component for shaking -->
+        <!-- 初期状態ではアニメーションは停止 -->
+        <a-animation 
+            id="shake-animation"
+            attribute="position"
+            dur="100"
+            to="0.05 1.25 -2.0"
+            direction="alternate"
+            repeat="indefinite"
+            easing="easeInOutSine"
+            startEvents="startshake"
+            endEvents="stopshake"
+            fill="forwards"
+            enabled="false"> 
+        </a-animation>
       </a-entity>
 
       <a-entity camera></a-entity>
     </a-scene>
+
+    <!-- コントロールパネル -->
+    <div id="control-panel">
+      <button id="zoom-in-button" class="ar-button">➕ ズームイン</button>
+      <button id="zoom-out-button" class="ar-button">➖ ズームアウト</button>
+      <button id="shake-button" class="ar-button">🖼️ フレームを揺らす</button>
+      <button id="info-toggle-button" class="ar-button">💡 解説</button>
+      <button id="capture-button" class="ar-button">📸 撮影・保存</button>
+    </div>
+
+
+    <!-- 操作案内メッセージボックス -->
+    <div id="info-box">
+      写真を保存しました！<br>
+      <hr style="margin: 10px 0; border-color: #555;">
+      **【重要：背景を一緒に写したい場合】**<br>
+      スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。
+    </div>
+
+    <!-- 解説パネル -->
+    <div id="explanation-panel">
+      <h3>ラス・メニーナス (女官たち)</h3>
+      <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
+      場所: スペイン・プラド美術館<br>
+      鏡の反射や、画家自身が描かれている点が複雑な構図を生み出しています。</p>
+    </div>
+
+    <script>
+      // グローバル変数の設定
+      const PAINTING_EL = document.getElementById('ar-painting');
+      const INFO_PANEL = document.getElementById('explanation-panel');
+      const SHAKE_ANIMATION = document.getElementById('shake-animation');
+      const ZOOM_STEP = 0.5; // ズーム変更のステップ幅
+      const MIN_Z = -3.5;    // 最も遠い位置
+      const MAX_Z = -1.0;    // 最も近い位置
+      let isShaking = false; // 揺れの状態を管理
+
+      /**
+       * dataURLをBlobに変換するヘルパー関数
+       */
+      function dataURLtoBlob(dataurl) {
+        let arr = dataurl.split(','), 
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), 
+            n = bstr.length, 
+            u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {type:mime});
+      }
+
+      function updatePaintingPosition(newZ) {
+        let currentPos = PAINTING_EL.getAttribute('position');
+        let targetZ = Math.max(MIN_Z, Math.min(MAX_Z, newZ));
+
+        PAINTING_EL.setAttribute('position', {
+          x: currentPos.x,
+          y: currentPos.y, 
+          z: targetZ
+        });
+      }
+
+      function captureScreenshotAndDownload() {
+        const sceneCanvas = document.querySelector('a-scene').canvas; 
+        const infoBox = document.getElementById('info-box');
+
+        // 揺れている場合は一時停止
+        const wasShaking = isShaking;
+        if (wasShaking) {
+            stopShake();
+        }
+
+        const wasPanelVisible = INFO_PANEL.style.display === 'block';
+        if (wasPanelVisible) {
+          INFO_PANEL.style.display = 'none';
+        }
+
+        if (!sceneCanvas) {
+          // エラー処理
+        }
+
+        try {
+          const dataURL = sceneCanvas.toDataURL('image/jpeg', 0.9);
+          const blob = dataURLtoBlob(dataURL);
+          const blobUrl = URL.createObjectURL(blob);
+          
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          
+          const date = new Date().toISOString().slice(0, 10);
+          link.download = `las-meninas-ar-${date}.jpg`;
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          URL.revokeObjectURL(blobUrl);
+
+          // 成功メッセージを表示
+          infoBox.style.display = 'block';
+          setTimeout(() => {
+            infoBox.style.display = 'none';
+          }, 6000); 
+
+        } catch (error) {
+          console.error('Error during screenshot capture or download:', error);
+          // エラー処理
+        } finally {
+           // 撮影が終わったら状態を元に戻す
+           if (wasPanelVisible) {
+              INFO_PANEL.style.display = 'block';
+           }
+           if (wasShaking) {
+              startShake();
+           }
+        }
+      }
+
+      function startShake() {
+          SHAKE_ANIMATION.setAttribute('enabled', true);
+          // アニメーションをトリガーするイベントをディスパッチ
+          PAINTING_EL.emit('startshake');
+          isShaking = true;
+          document.getElementById('shake-button').textContent = '🖼️ フレームを止める';
+          document.getElementById('shake-button').style.backgroundColor = '#17a2b8'; // 色を変更して動作中を示す
+      }
+
+      function stopShake() {
+          SHAKE_ANIMATION.setAttribute('enabled', false);
+          // アニメーションをリセット
+          PAINTING_EL.emit('stopshake');
+          // 揺れを止めた後、絵の位置を初期位置に戻す
+          PAINTING_EL.setAttribute('position', '0 1.25 -2.0');
+          isShaking = false;
+          document.getElementById('shake-button').textContent = '🖼️ フレームを揺らす';
+          document.getElementById('shake-button').style.backgroundColor = '#dc3545';
+      }
+
+      // イベントリスナーの設定
+      document.addEventListener('DOMContentLoaded', () => {
+        const zoomInButton = document.getElementById('zoom-in-button');
+        const zoomOutButton = document.getElementById('zoom-out-button');
+        const captureButton = document.getElementById('capture-button');
+        const infoToggleButton = document.getElementById('info-toggle-button');
+        const shakeButton = document.getElementById('shake-button');
+
+        // ズームイン機能
+        zoomInButton.addEventListener('click', () => {
+          let currentPos = PAINTING_EL.getAttribute('position');
+          updatePaintingPosition(currentPos.z + ZOOM_STEP); 
+        });
+
+        // ズームアウト機能
+        zoomOutButton.addEventListener('click', () => {
+          let currentPos = PAINTING_EL.getAttribute('position');
+          updatePaintingPosition(currentPos.z - ZOOM_STEP);
+        });
+
+        // フレーム揺らし機能
+        shakeButton.addEventListener('click', () => {
+          if (isShaking) {
+            stopShake();
+          } else {
+            startShake();
+          }
+        });
+
+        // 撮影機能
+        captureButton.addEventListener('click', captureScreenshotAndDownload);
+
+        // 解説表示切り替え機能
+        infoToggleButton.addEventListener('click', () => {
+          if (INFO_PANEL.style.display === 'block') {
+            INFO_PANEL.style.display = 'none';
+            infoToggleButton.textContent = '💡 解説';
+          } else {
+            INFO_PANEL.style.display = 'block';
+            infoToggleButton.textContent = '💡 解説 (非表示)';
+          }
+        });
+      });
+    </script>
   </body>
 </html>
 
