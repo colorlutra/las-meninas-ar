@@ -6,7 +6,67 @@
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
-      body { margin
+      body { margin: 0; overflow: hidden; }
+      #screenshotBtn {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        padding: 10px 15px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        border: none;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 撮影ボタン -->
+    <button id="screenshotBtn">📸 撮影</button>
+
+    <a-scene embedded 
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
+      vr-mode-ui="enabled: false">
+
+      <a-assets>
+        <img id="meninas" src="lasmeninas_transparent.png">
+      </a-assets>
+
+      <!-- 画像比率：19.5:9（例：1688×3663）に合わせたサイズ -->
+      <a-entity
+        geometry="primitive: plane; height: 2.169; width: 1.0"
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 0.3 -2"
+        rotation="0 0 0">
+      </a-entity>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      document.getElementById('screenshotBtn').addEventListener('click', () => {
+        const scene = document.querySelector('a-scene');
+        const canvas = scene.renderer && scene.renderer.domElement;
+        if (canvas) {
+          try {
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = 'ar_screenshot.png';
+            link.click();
+          } catch (e) {
+            alert("スクリーンショットに失敗しました。HTTPS環境でお試しください。");
+          }
+        } else {
+          alert("canvasが見つかりませんでした。");
+        }
+      });
+    </script>
+  </body>
+</html>
+
 
 
 
