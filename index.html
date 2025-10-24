@@ -2,48 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ラス・メニーナス (安定鑑賞シミュレーター)</title>
+    <title>ラス・メニーナス AR (操作性改善版)</title>
     
-    <!-- A-FrameとAR.jsの依存関係を削除 -->
-    
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
-      body { 
-        margin: 0; 
-        overflow: hidden; 
-        background-color: #1a1a1a; /* 背景を黒にして、美術館の壁のように見せる */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        font-family: 'Inter', sans-serif;
-      }
-      
-      /* 絵画のコンテナ (巨大なフレームを表現) */
-      #painting-container {
-        position: relative;
-        /* キャンバスサイズの美調節値 2.5m x 1.152m をCSSで再現 */
-        width: 60vh; /* 画面高さの60%を基準に設定 */
-        height: 130vh; /* 60vh * 2.169 = 130.14vh (縦長) */
-        overflow: hidden;
-        border: 20px solid #755b41; /* 豪華な額縁 */
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease; /* スムーズなズームエフェクト */
-      }
-
-      /* 絵画本体 (内部の画像) */
-      #meninas-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        top: 0;
-        left: 0;
-        /* ズームと移動はCSSのtransformで行う */
-        transform: translate(0, 0) scale(1.0);
-        transform-origin: center center;
-        transition: transform 0.3s ease;
-      }
+      body { margin: 0; overflow: hidden; }
       
       /* 全てのボタンのコンテナ */
       #control-panel {
@@ -55,23 +19,24 @@
         display: flex;
         flex-wrap: wrap; 
         justify-content: center;
-        gap: 8px; /* ボタン間のスペースを狭く */
-        max-width: 90vw;
+        gap: 10px; /* スペースを少し広げた */
+        max-width: 95vw;
         padding: 10px;
         background-color: rgba(0, 0, 0, 0.6);
-        border-radius: 10px;
+        border-radius: 12px; /* 角丸を少し大きく */
+        transition: opacity 0.3s ease; /* 非表示時のアニメーション */
       }
       
       /* ボタンの共通スタイル */
       .ar-button {
-        padding: 10px 15px;
+        padding: 12px 18px; /* パディングを大きくしてタッチエリアを確保 */
         color: white;
         border: none;
-        border-radius: 20px;
-        font-size: 14px;
+        border-radius: 25px; /* 角丸を大きく */
+        font-size: 15px; /* フォントサイズを大きく */
         font-weight: bold;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4); /* シャドウを強めた */
         transition: background-color 0.2s, transform 0.1s;
       }
       .ar-button:active {
@@ -84,14 +49,28 @@
       #move-up-button, #move-down-button { background-color: #ffc107; color: #333; } /* 黄 */
       #move-left-button, #move-right-button { background-color: #28a745; } /* 緑 */
       #info-toggle-button { background-color: #6f42c1; } /* 紫 */
+      #capture-button { background-color: #dc3545; } /* 赤 */
+      /* 新しい操作パネル切り替えボタン */
+      #panel-toggle-button {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 1000;
+        background-color: rgba(100, 100, 100, 0.8);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 50%; /* 丸型ボタン */
+        font-size: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
 
-      /* 解説パネルのスタイル */
+      /* 解説パネルのスタイル (変更なし) */
       #explanation-panel {
         position: fixed;
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: rgba(255, 255, 255, 0.95); /* 明るい背景 */
+        background-color: rgba(255, 255, 255, 0.95);
         color: #333;
         padding: 15px 25px;
         border-radius: 8px;
@@ -99,7 +78,7 @@
         text-align: center;
         width: 80%;
         max-width: 400px;
-        pointer-events: auto; /* クリック可能 */
+        pointer-events: auto;
         display: none; 
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       }
@@ -112,14 +91,53 @@
         margin: 0;
         font-size: 14px;
       }
+       /* 操作案内メッセージボックスのスタイル (変更なし) */
+      #info-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(43, 43, 43, 0.95); 
+        color: white;
+        padding: 25px 35px;
+        border-radius: 12px;
+        z-index: 1000;
+        text-align: center;
+        display: none; 
+        font-size: 16px;
+        max-width: 80%;
+        line-height: 1.6;
+      }
+      #info-box strong {
+        color: #ffcc00; 
+        font-size: 18px;
+        display: block;
+        margin-top: 5px;
+      }
     </style>
   </head>
   <body>
 
-    <!-- 巨大絵画シミュレーションエリア -->
-    <div id="painting-container">
-      <img id="meninas-image" src="lasmeninas_transparent.png" alt="Las Meninas">
-    </div>
+    <!-- ARシーン (マーカーレス) -->
+    <a-scene embedded 
+      arjs="sourceType: webcam; trackingMethod: raw; debugUIEnabled: false;" 
+      vr-mode-ui="enabled: false">
+
+      <a-assets>
+        <img id="meninas" src="lasmeninas_transparent.png">
+      </a-assets>
+
+      <!-- 絵画エンティティ: AR空間に固定し、JSで位置を操作する -->
+      <!-- 初期設定: height: 2.5, width: 1.152, position="0 1.25 -2.0" -->
+      <a-entity id="ar-painting"
+        geometry="primitive: plane; height: 2.5; width: 1.152"  
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 1.25 -2.0"    
+        rotation="0 0 0">
+      </a-entity>
+
+      <a-entity camera></a-entity>
+    </a-scene>
 
     <!-- コントロールパネル -->
     <div id="control-panel">
@@ -135,8 +153,14 @@
 
       <!-- 解説表示 -->
       <button id="info-toggle-button" class="ar-button">💡 解説</button>
-      
+
+      <!-- 撮影機能 (AR必須のため復活) -->
+      <button id="capture-button" class="ar-button">📸 撮影・保存</button>
     </div>
+
+    <!-- 操作パネル表示/非表示トグルボタン (常に表示) -->
+    <button id="panel-toggle-button" class="ar-button">⚙️</button>
+
 
     <!-- 解説パネル -->
     <div id="explanation-panel">
@@ -144,100 +168,228 @@
       <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
       場所: スペイン・プラド美術館<br>
       鏡の反射や、画家自身が描かれている点が複雑な構図を生み出しています。<br><br>
-      💡 **使い方**：ズームボタンと矢印ボタンで、絵画の謎を隅々まで探してみよう！</p>
+      💡 **使い方**：ズームと矢印で絵の位置を調整し、人が映り込むトリックアートを完成させよう！</p>
+    </div>
+
+    <!-- 操作案内メッセージボックス -->
+    <div id="info-box">
+      写真を保存しました！<br>
+      <hr style="margin: 10px 0; border-color: #555;">
+      **【重要：背景を一緒に写したい場合】**<br>
+      スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。
     </div>
 
     <script>
       // グローバル変数の設定
-      const PAINTING_IMAGE = document.getElementById('meninas-image');
+      const PAINTING_EL = document.getElementById('ar-painting');
       const INFO_PANEL = document.getElementById('explanation-panel');
-      
+      const INFO_BOX = document.getElementById('info-box');
+      const CONTROL_PANEL = document.getElementById('control-panel'); // 新しく追加
+      const PANEL_TOGGLE_BUTTON = document.getElementById('panel-toggle-button'); // 新しく追加
+
+
       // 状態管理
       let currentScale = 1.0;
-      let currentX = 0;
-      let currentY = 0;
-
+      const initialHeight = 2.5;
+      const initialWidth = 1.152;
+      
       // 定数
-      const ZOOM_FACTOR = 0.2; // ズームのステップ
-      const MOVE_STEP = 10;    // 移動のステップ (パーセント単位)
-      const MAX_SCALE = 3.0;
-      const MIN_SCALE = 1.0;
+      const ZOOM_FACTOR = 0.5; // ズームのステップ (m単位)
+      const MOVE_STEP = 0.2;   // 移動のステップ (m単位)
+      const MAX_Z = -0.5;      // 最も近い位置 (m)
+      const MIN_Z = -5.0;      // 最も遠い位置 (m)
 
       /**
-       * 絵画の transform プロパティを一括で更新する
+       * dataURLをBlobに変換するヘルパー関数
        */
-      function updateTransform() {
-        PAINTING_IMAGE.style.transform = `translate(${currentX}%, ${currentY}%) scale(${currentScale})`;
+      function dataURLtoBlob(dataurl) {
+        let arr = dataurl.split(','), 
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), 
+            n = bstr.length, 
+            u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {type:mime});
       }
 
-      // --- ズーム機能 ---
+      /**
+       * ARエンティティの位置とサイズを一括で更新する
+       * @param {number} x - X軸 (左右)
+       * @param {number} y - Y軸 (上下)
+       * @param {number} z - Z軸 (前後/ズーム)
+       * @param {number} h - Height (高さ)
+       * @param {number} w - Width (幅)
+       */
+      function updatePaintingTransform(x, y, z, h, w) {
+          PAINTING_EL.setAttribute('position', { x: x, y: y, z: z });
+          PAINTING_EL.setAttribute('geometry', { primitive: 'plane', height: h, width: w });
+      }
+
+      // --- ズーム機能 (Z軸操作) ---
       function zoom(direction) {
-        let newScale;
+        let currentPos = PAINTING_EL.getAttribute('position');
+        let currentGeom = PAINTING_EL.getAttribute('geometry');
+        
+        let newZ;
         if (direction === 'in') {
-          newScale = Math.min(MAX_SCALE, currentScale + ZOOM_FACTOR);
+          newZ = Math.min(MAX_Z, currentPos.z + ZOOM_FACTOR); // Z軸を0に近づける
         } else {
-          newScale = Math.max(MIN_SCALE, currentScale - ZOOM_FACTOR);
+          newZ = Math.max(MIN_Z, currentPos.z - ZOOM_FACTOR); // Z軸を遠ざける
         }
-        
-        // ズームが実際に発生した場合のみ処理
-        if (newScale !== currentScale) {
-          currentScale = newScale;
-          
-          // ズーム後に、移動範囲を超えないように位置を修正 (特に縮小時)
-          if (currentScale === MIN_SCALE) {
-            currentX = 0;
-            currentY = 0;
-          } else {
-            // スケールに応じて移動可能範囲を計算
-            const maxTranslation = (currentScale - 1) / 2 * 100;
 
-            // ズームアウトなどで移動範囲が狭まった場合、現在の位置が範囲内かチェックし、はみ出ていたらクリップする
-            currentX = Math.max(-maxTranslation, Math.min(maxTranslation, currentX));
-            currentY = Math.max(-maxTranslation, Math.min(maxTranslation, currentY));
-          }
+        // ズーム（Z軸）が移動したら、それに合わせてサイズとY軸（床合わせ）も変更する
+        if (newZ !== currentPos.z) {
+          // Z軸を基準に新しいスケールを計算（-2.0mが基準スケール1.0）
+          // スケールはZ軸の絶対値に反比例させると自然
+          currentScale = Math.abs(2.0 / newZ);
+
+          const newH = initialHeight * currentScale;
+          const newW = initialWidth * currentScale;
           
-          updateTransform();
+          // Y軸も新しい高さに合わせて調整 (newH / 2)
+          updatePaintingTransform(currentPos.x, newH / 2, newZ, newH, newW);
         }
       }
 
-      // --- 移動機能 ---
+      // --- 移動機能 (X, Y軸操作) ---
       function move(axis, step) {
-        if (currentScale === MIN_SCALE) return; // ズームしていない場合は移動不可
+        let currentPos = PAINTING_EL.getAttribute('position');
         
-        const maxTranslation = (currentScale - 1) / 2 * 100;
-        
+        let newX = currentPos.x;
+        let newY = currentPos.y;
+        let newZ = currentPos.z;
+        let currentGeom = PAINTING_EL.getAttribute('geometry');
+
         if (axis === 'X') {
-          let newX = currentX + step;
-          currentX = Math.max(-maxTranslation, Math.min(maxTranslation, newX));
+          newX = currentPos.x + step;
         } else if (axis === 'Y') {
-          let newY = currentY + step;
-          currentY = Math.max(-maxTranslation, Math.min(maxTranslation, newY));
+          // Y軸の移動は、初期の床合わせ位置 (currentGeom.height / 2) を基準とする
+          newY = currentPos.y + step;
         }
+
+        updatePaintingTransform(newX, newY, newZ, currentGeom.height, currentGeom.width);
+      }
+      
+      // --- 撮影機能 ---
+      function captureScreenshotAndDownload() {
+        const sceneCanvas = document.querySelector('a-scene').canvas; 
         
-        updateTransform();
+        // パネルを非表示にして撮影
+        const wasPanelVisible = CONTROL_PANEL.style.display !== 'none';
+        const wasInfoPanelVisible = INFO_PANEL.style.display === 'block';
+
+        if (wasPanelVisible) {
+          CONTROL_PANEL.style.display = 'none';
+          PANEL_TOGGLE_BUTTON.style.display = 'none'; // トグルボタンも隠す
+        }
+        if (wasInfoPanelVisible) {
+          INFO_PANEL.style.display = 'none';
+        }
+
+
+        if (!sceneCanvas) {
+          console.error('Canvas not found.');
+          INFO_BOX.innerHTML = `ARの初期化が完了していません。<br><hr style="margin: 10px 0; border-color: #555;">**【重要】** スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。`;
+          INFO_BOX.style.display = 'block';
+          setTimeout(() => { INFO_BOX.style.display = 'none'; }, 6000);
+          
+          if (wasPanelVisible) {
+             CONTROL_PANEL.style.display = 'flex';
+             PANEL_TOGGLE_BUTTON.style.display = 'block';
+          }
+          if (wasInfoPanelVisible) {
+              INFO_PANEL.style.display = 'block';
+          }
+          return;
+        }
+
+        // 撮影処理
+        setTimeout(() => {
+          try {
+            const dataURL = sceneCanvas.toDataURL('image/jpeg', 0.9);
+            const blob = dataURLtoBlob(dataURL);
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            
+            const date = new Date().toISOString().slice(0, 10);
+            link.download = `las-meninas-ar-${date}.jpg`;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(blobUrl);
+
+            // 成功メッセージを表示
+            INFO_BOX.innerHTML = `写真を保存しました！<br><hr style="margin: 10px 0; border-color: #555;">**【重要：背景を一緒に写したい場合】**<br>スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。`;
+            INFO_BOX.style.display = 'block';
+            setTimeout(() => { INFO_BOX.style.display = 'none'; }, 6000); 
+
+          } catch (error) {
+            console.error('Error during screenshot capture or download:', error);
+            // エラーが発生した場合も、ネイティブSSを促すメッセージボックスを表示
+            INFO_BOX.innerHTML = `撮影に失敗しました。<br><hr style="margin: 10px 0; border-color: #555;">**【重要】** スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。`;
+            INFO_BOX.style.display = 'block';
+            setTimeout(() => { INFO_BOX.style.display = 'none'; }, 6000);
+          } finally {
+             // 撮影が終わったらパネル類を元に戻す
+             if (wasPanelVisible) {
+                CONTROL_PANEL.style.display = 'flex';
+                PANEL_TOGGLE_BUTTON.style.display = 'block';
+             }
+             if (wasInfoPanelVisible) {
+                INFO_PANEL.style.display = 'block';
+             }
+          }
+        }, 100); // わずかな遅延を入れてUI非表示を確実に反映させる
       }
 
+      // --- パネル表示/非表示切り替え機能 ---
+      function toggleControlPanel() {
+        if (CONTROL_PANEL.style.display === 'none') {
+          // 表示する
+          CONTROL_PANEL.style.display = 'flex';
+          PANEL_TOGGLE_BUTTON.textContent = '⚙️';
+          PANEL_TOGGLE_BUTTON.style.backgroundColor = 'rgba(100, 100, 100, 0.8)';
+        } else {
+          // 非表示にする
+          CONTROL_PANEL.style.display = 'none';
+          PANEL_TOGGLE_BUTTON.textContent = '📷'; // カメラアイコンに変更
+          PANEL_TOGGLE_BUTTON.style.backgroundColor = '#dc3545'; // 赤色に変更
+        }
+      }
 
       // イベントリスナーの設定
       document.addEventListener('DOMContentLoaded', () => {
         const zoomInButton = document.getElementById('zoom-in-button');
         const zoomOutButton = document.getElementById('zoom-out-button');
         const infoToggleButton = document.getElementById('info-toggle-button');
+        const captureButton = document.getElementById('capture-button');
         
         const moveUpButton = document.getElementById('move-up-button');
         const moveDownButton = document.getElementById('move-down-button');
         const moveLeftButton = document.getElementById('move-left-button');
         const moveRightButton = document.getElementById('move-right-button');
 
-        // ズームイン/アウト機能
+        // ズームイン/アウト機能 (Z軸操作)
         zoomInButton.addEventListener('click', () => zoom('in'));
         zoomOutButton.addEventListener('click', () => zoom('out'));
 
-        // 移動機能 (Y軸は上がマイナス方向)
-        moveUpButton.addEventListener('click', () => move('Y', -MOVE_STEP));
-        moveDownButton.addEventListener('click', () => move('Y', MOVE_STEP));
+        // 移動機能 (X, Y軸操作)
+        moveUpButton.addEventListener('click', () => move('Y', MOVE_STEP));
+        moveDownButton.addEventListener('click', () => move('Y', -MOVE_STEP));
         moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
         moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
+        
+        // 撮影機能
+        captureButton.addEventListener('click', captureScreenshotAndDownload);
+
+        // パネル切り替え機能
+        PANEL_TOGGLE_BUTTON.addEventListener('click', toggleControlPanel);
 
 
         // 解説表示切り替え機能
@@ -254,6 +406,7 @@
     </script>
   </body>
 </html>
+
 
 
 
