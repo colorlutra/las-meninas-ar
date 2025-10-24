@@ -2,33 +2,169 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Las Meninas AR (マーカー方式・臨場感版)</title>
+    <title>Las Meninas AR (最終トリックアート版)</title>
+    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
+      
+      /* 撮影ボタンのスタイル (前回の成功コードを維持) */
+      #capture-button {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999; 
+        padding: 15px 30px;
+        background-color: #4CAF50; /* 緑 */
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: background-color 0.3s;
+      }
+      #capture-button:active {
+        background-color: #45a049;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      /* 操作案内のメッセージボックスのスタイル (前回の成功コードを維持) */
+      #info-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(43, 43, 43, 0.95); 
+        color: white;
+        padding: 25px 35px;
+        border-radius: 12px;
+        z-index: 1000;
+        text-align: center;
+        display: none; 
+        font-size: 16px;
+        max-width: 80%;
+        line-height: 1.6;
+      }
+      #info-box strong {
+        color: #ffcc00; 
+        font-size: 18px;
+        display: block;
+        margin-top: 5px;
+      }
     </style>
   </head>
   <body>
+    <!-- ARシーン (マーカーレス) -->
     <a-scene embedded 
-      arjs="sourceType: webcam; detectionMode: mono; patternRatio: 0.5; debugUIEnabled: false;" 
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
       <a-assets>
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <a-marker type='hiro'>
-        <a-entity
-          geometry="primitive: plane; height: 2.169; width: 1.0"  material="src: #meninas; transparent: true; alphaTest: 0.05"
-          position="0 1.0845 0"    rotation="0 0 0">
-        </a-entity>
-      </a-marker>
+      <!-- 臨場感最大化のための設定: Y軸=高さの半分、Z軸=-3mで巨大化 -->
+      <a-entity
+        geometry="primitive: plane; height: 3.0; width: 1.383"  <!-- ★ 歪みを防ぐため、3.0m/2.169 = 1.383mで幅も拡大済み ★ -->
+        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        position="0 1.5 -3.0"    <!-- Y=1.5で絵の下端を床に合わせる -->
+        rotation="0 0 0">
+      </a-entity>
 
       <a-entity camera></a-entity>
     </a-scene>
+
+    <!-- 撮影ボタン -->
+    <button id="capture-button">📸 撮影・保存</button>
+
+    <!-- 操作案内メッセージボックス -->
+    <div id="info-box">
+      写真を保存しました！<br>
+      <hr style="margin: 10px 0; border-color: #555;">
+      **【重要：背景を一緒に写したい場合】**<br>
+      スマートフォンの電源ボタンと音量ボタンを同時に押して、**画面全体のスクリーンショット**を撮ってください。
+    </div>
+
+    <script>
+      /**
+       * dataURLをBlobに変換するヘルパー関数
+       */
+      function dataURLtoBlob(dataurl) {
+        let arr = dataurl.split(','), 
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), 
+            n = bstr.length, 
+            u8arr = new Uint8Array(n);
+        while(n--){
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {type:mime});
+      }
+
+      function captureScreenshotAndDownload() {
+        const sceneCanvas = document.querySelector('a-scene').canvas; 
+        const infoBox = document.getElementById('info-box');
+
+        if (!sceneCanvas) {
+          console.error('AR Scene Canvas element not found.');
+          infoBox.innerHTML = 'エラー: スクリーンショットの取得に失敗しました。';
+          infoBox.style.display = 'block';
+          setTimeout(() => { infoBox.style.display = 'none'; }, 5000);
+          return;
+        }
+
+        try {
+          // canvasの内容をJPEG形式のデータURLとして取得 (画質0.9)
+          const dataURL = sceneCanvas.toDataURL('image/jpeg', 0.9);
+
+          if (!dataURL || dataURL === 'data:,') {
+            throw new Error('Empty image data.');
+          }
+
+          // Blobに変換してダウンロード
+          const blob = dataURLtoBlob(dataURL);
+          const blobUrl = URL.createObjectURL(blob);
+          
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          
+          const date = new Date().toISOString().slice(0, 10);
+          link.download = `las-meninas-ar-${date}.jpg`;
+
+          // ダウンロード実行
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          URL.revokeObjectURL(blobUrl);
+
+          // 成功メッセージと操作案内を表示
+          infoBox.style.display = 'block';
+          setTimeout(() => {
+            infoBox.style.display = 'none';
+          }, 6000); // 6秒間メッセージを表示
+
+        } catch (error) {
+          console.error('Error during screenshot capture or download:', error);
+          infoBox.innerHTML = 'エラー: 画像保存に失敗しました。';
+          infoBox.style.display = 'block';
+          setTimeout(() => { infoBox.style.display = 'none'; }, 5000);
+        }
+      }
+
+      // ボタンにイベントリスナーを設定
+      document.addEventListener('DOMContentLoaded', () => {
+        const button = document.getElementById('capture-button');
+        button.addEventListener('click', captureScreenshotAndDownload);
+      });
+    </script>
   </body>
 </html>
+
 
 
 
