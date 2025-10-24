@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ラス・メニーナス AR (顔パネル再導入版)</title>
+    <title>ラス・メニーナス AR (最適シンプル構造)</title>
     
     <!-- A-FrameとAR.jsを再読み込み -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -11,8 +11,6 @@
     <style>
       body { margin: 0; overflow: hidden; font-family: sans-serif; }
       
-      /* A-FrameシーンはAR.jsがカメラを設定するため、固定設定は不要 */
-
       /* =================================================== */
       /* 1. 初期表示アイコン (右下) */
       /* =================================================== */
@@ -132,20 +130,18 @@
 
       <a-assets>
         <!-- 画像アセットはそのまま維持 -->
-        <!-- 注: lasmeninas_transparent.png は顔部分が透明になっている画像であると仮定 -->
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
       <!-- 安定したジオメトリと位置 -->
+      <!-- Z座標を-2.0に変更 (シンプル構造の最適値) -->
       <a-entity id="ar-painting"
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -5.0" 
+        position="0 0.3 -2.0" 
         rotation="0 0 0"
         scale="1 1 1">
       </a-entity>
-      
-      <!-- AR.jsがカメラを自動設定するため、<a-entity camera> は不要/干渉回避のため削除 -->
       
     </a-scene>
 
@@ -187,14 +183,14 @@
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
 
-      // 初期値 (リセット用): ARモードに戻すため、Z軸はそのまま維持
-      const INITIAL_POSITION = { x: 0, y: 0.3, z: -5.0 }; 
+      // 初期値 (リセット用): Z軸を-2.0に変更
+      const INITIAL_POSITION = { x: 0, y: 0.3, z: -2.0 }; 
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
       // 定数
-      const ZOOM_STEP = 0.5;   // スケール変更のステップ
-      const MOVE_STEP = 0.2;   // 移動のステップ (m単位)
-      const MAX_SCALE = 5.0;   // 最大スケール
+      const ZOOM_STEP = 0.2;   // スケール変更のステップを微調整
+      const MOVE_STEP = 0.1;   // 移動のステップ (m単位)を微調整
+      const MAX_SCALE = 3.0;   // 最大スケールを調整
       const MIN_SCALE = 0.5;   // 最小スケール
 
       /**
