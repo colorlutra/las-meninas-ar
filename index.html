@@ -2,14 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ラス・メニーナス AR (臨場感最終版)</title>
+    <title>ラス・メニーナス AR (顔パネル再導入版)</title>
     
-    <!-- A-FrameとAR.jsの読み込み --><script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <!-- A-FrameとAR.jsを再読み込み -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     
     <style>
       body { margin: 0; overflow: hidden; font-family: sans-serif; }
       
+      /* A-FrameシーンはAR.jsがカメラを設定するため、固定設定は不要 */
+
       /* =================================================== */
       /* 1. 初期表示アイコン (右下) */
       /* =================================================== */
@@ -122,44 +125,57 @@
     </style>
   </head>
   <body>
-    <!-- ARシーン --><a-scene embedded 
+    <!-- ARシーンを再導入 -->
+    <a-scene embedded 
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
 
       <a-assets>
+        <!-- 画像アセットはそのまま維持 -->
+        <!-- 注: lasmeninas_transparent.png は顔部分が透明になっている画像であると仮定 -->
         <img id="meninas" src="lasmeninas_transparent.png">
       </a-assets>
 
-      <!-- 安定したジオメトリと位置 --><a-entity id="ar-painting"
+      <!-- 安定したジオメトリと位置 -->
+      <a-entity id="ar-painting"
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -5.0" <!-- Z軸を -5.0 に変更 -->rotation="0 0 0"
+        position="0 0.3 -5.0" 
+        rotation="0 0 0"
         scale="1 1 1">
       </a-entity>
       
+      <!-- AR.jsがカメラを自動設定するため、<a-entity camera> は不要/干渉回避のため削除 -->
+      
     </a-scene>
 
-    <!-- UI: 右下のアイコンコンテナ --><div id="initial-buttons-container">
+    <!-- UI: 右下のアイコンコンテナ -->
+    <div id="initial-buttons-container">
       <button id="settings-icon-button" class="initial-icon-button">⚙️</button>
       <button id="info-icon-button" class="initial-icon-button">💡</button>
     </div>
 
-    <!-- UI: 設定パネル (詳細操作) --><div id="settings-panel">
-      <!-- 1行目: ズーム --><button id="zoom-in-button" class="setting-button">➕ 拡大</button>
+    <!-- UI: 設定パネル (詳細操作) -->
+    <div id="settings-panel">
+      <!-- 1行目: ズーム -->
+      <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
       <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
       
-      <!-- 2行目: 上下左右 --><button id="move-up-button" class="setting-button">⬆️ 上へ</button>
+      <!-- 2行目: 上下左右 -->
+      <button id="move-up-button" class="setting-button">⬆️ 上へ</button>
       <button id="move-down-button" class="setting-button">⬇️ 下へ</button>
       <button id="move-left-button" class="setting-button">⬅️ 左へ</button>
       <button id="move-right-button" class="setting-button">➡️ 右へ</button>
 
-      <!-- 3行目: リセット --><button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
+      <!-- 3行目: リセット -->
+      <button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
     </div>
 
-    <!-- UI: 解説パネル --><div id="explanation-panel">
+    <!-- UI: 解説パネル -->
+    <div id="explanation-panel">
       <h3>ラス・メニーナス (女官たち)</h3>
       <p>作者: ディエゴ・ベラスケス (1656年頃)<br>
-      💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、人が映り込むトリックアートを完成させよう！</p>
+      💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！</p>
     </div>
 
     <script>
@@ -171,7 +187,7 @@
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
 
-      // 初期値 (リセット用): Z軸を -5.0 に変更
+      // 初期値 (リセット用): ARモードに戻すため、Z軸はそのまま維持
       const INITIAL_POSITION = { x: 0, y: 0.3, z: -5.0 }; 
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
@@ -182,7 +198,7 @@
       const MIN_SCALE = 0.5;   // 最小スケール
 
       /**
-       * ARエンティティの位置とスケールを一括で更新する
+       * 3Dエンティティの位置とスケールを一括で更新する
        */
       function updatePaintingTransform(position, scale) {
           PAINTING_EL.setAttribute('position', position);
@@ -215,16 +231,14 @@
         
         let newX = currentPos.x;
         let newY = currentPos.y;
-        let newZ = currentPos.z;
+        let newZ = currentPos.z; 
 
         if (axis === 'X') {
           newX = currentPos.x + step;
         } else if (axis === 'Y') {
           newY = currentPos.y + step;
-        } else if (axis === 'Z') {
-          newZ = currentPos.z + step;
         }
-
+        
         updatePaintingTransform({x: newX, y: newY, z: newZ}, currentScale);
       }
       
