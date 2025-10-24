@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ラス・メニーナス AR (究極のUI)</title>
+    <title>ラス・メニーナス AR (サイズ修正版)</title>
     
     <!-- A-FrameとAR.jsの読み込み -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -121,7 +121,7 @@
   </head>
   <body>
 
-    <!-- A-FRAME AR SCENE (ユーザー提供のシンプル構造をベースにIDを追加) -->
+    <!-- A-FRAME AR SCENE -->
     <a-scene embedded 
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false">
@@ -131,10 +131,12 @@
       </a-assets>
 
       <a-entity id="ar-painting"
+        <!-- geometryは固定し、scaleでズームを制御する -->
         geometry="primitive: plane; height: 2.169; width: 1.0"  
         material="src: #meninas; transparent: true; alphaTest: 0.05"
         position="0 0.3 -2"    
-        rotation="0 0 0">
+        rotation="0 0 0"
+        scale="1 1 1"> <!-- scaleの初期値を追加 -->
       </a-entity>
 
       <a-entity camera></a-entity>
@@ -149,7 +151,7 @@
     <!-- UI: 設定パネル (詳細操作) -->
     <div id="settings-panel">
       <!-- 1行目: ズーム -->
-      <button id="zoom-in-button" class="setting-button">➕ ズーム</button>
+      <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
       <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
       
       <!-- 2行目: 上下左右 -->
@@ -159,7 +161,7 @@
       <button id="move-right-button" class="setting-button">➡️ 右へ</button>
 
       <!-- 3行目: リセット -->
-      <button id="reset-button" class="setting-button">↩️ 初期位置にリセット</button>
+      <button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
     </div>
 
     <!-- UI: 解説パネル -->
@@ -183,75 +185,67 @@
 
       // ユーザー提供のA-Frameコードから初期値を設定 (リセット用)
       const INITIAL_POSITION = { x: 0, y: 0.3, z: -2.0 }; // ユーザーのコードのposition="0 0.3 -2"
-      const INITIAL_GEOMETRY = { primitive: 'plane', height: 2.169, width: 1.0 }; // ユーザーのコードのgeometry="primitive: plane; height: 2.169; width: 1.0"
+      const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         // scale="1 1 1"
       
-      // スケール状態管理
-      let currentScale = 1.0; 
-
       // 定数
-      const ZOOM_FACTOR = 0.5; // ズームのステップ (m単位)
+      const ZOOM_STEP = 0.5;   // スケール変更のステップ
       const MOVE_STEP = 0.2;   // 移動のステップ (m単位)
-      const MAX_Z = -0.5;      // 最も近い位置 (m)
-      const MIN_Z = -5.0;      // 最も遠い位置 (m)
+      const MAX_SCALE = 5.0;   // 最大スケール
+      const MIN_SCALE = 0.5;   // 最小スケール
 
       /**
-       * ARエンティティの位置とサイズを一括で更新する
+       * ARエンティティの位置とスケールを一括で更新する
        */
-      function updatePaintingTransform(x, y, z, h, w) {
-          PAINTING_EL.setAttribute('position', { x: x, y: y, z: z });
-          PAINTING_EL.setAttribute('geometry', { primitive: 'plane', height: h, width: w });
+      function updatePaintingTransform(position, scale) {
+          PAINTING_EL.setAttribute('position', position);
+          PAINTING_EL.setAttribute('scale', scale);
       }
 
-      // --- ズーム機能 (Z軸操作) ---
+      // --- ズーム機能 (Scale操作) ---
       function zoom(direction) {
-        let currentPos = PAINTING_EL.getAttribute('position');
+        let currentScale = PAINTING_EL.getAttribute('scale');
         
-        let newZ;
+        let newScaleValue;
         if (direction === 'in') {
-          newZ = Math.min(MAX_Z, currentPos.z + ZOOM_FACTOR); 
+          newScaleValue = Math.min(MAX_SCALE, currentScale.x + ZOOM_STEP); 
         } else {
-          newZ = Math.max(MIN_Z, currentPos.z - ZOOM_FACTOR); 
+          newScaleValue = Math.max(MIN_SCALE, currentScale.x - ZOOM_STEP); 
         }
 
-        if (newZ !== currentPos.z) {
-          // Z軸を基準に新しいスケールを計算（INITIAL_POSITION.zが基準スケール1.0）
-          currentScale = Math.abs(INITIAL_POSITION.z / newZ);
-
-          const newH = INITIAL_GEOMETRY.height * currentScale;
-          const newW = INITIAL_GEOMETRY.width * currentScale;
+        if (newScaleValue !== currentScale.x) {
+          const newScale = { x: newScaleValue, y: newScaleValue, z: newScaleValue };
+          let currentPos = PAINTING_EL.getAttribute('position');
           
-          // Y軸も新しい高さに合わせて調整 (床合わせ。ただし、ユーザーコードではY=0.3なのでそれを基準にする)
-          // Y座標の変更はしない (INITIAL_POSITION.yを維持)
-          updatePaintingTransform(currentPos.x, INITIAL_POSITION.y * currentScale, newZ, newH, newW);
+          updatePaintingTransform(currentPos, newScale);
         }
       }
 
       // --- 移動機能 (X, Y軸操作) ---
       function move(axis, step) {
         let currentPos = PAINTING_EL.getAttribute('position');
-        let currentGeom = PAINTING_EL.getAttribute('geometry');
+        let currentScale = PAINTING_EL.getAttribute('scale');
         
         let newX = currentPos.x;
         let newY = currentPos.y;
+        let newZ = currentPos.z;
 
         if (axis === 'X') {
           newX = currentPos.x + step;
         } else if (axis === 'Y') {
           newY = currentPos.y + step;
+        } else if (axis === 'Z') {
+          // Z軸移動はスケールと関係ないため、単純な加算
+          newZ = currentPos.z + step;
         }
 
-        updatePaintingTransform(newX, newY, currentPos.z, currentGeom.height, currentGeom.width);
+        updatePaintingTransform({x: newX, y: newY, z: newZ}, currentScale);
       }
       
       // --- リセット機能 ---
       function resetPaintingPosition() {
-        currentScale = 1.0; // スケールもリセット
         updatePaintingTransform(
-          INITIAL_POSITION.x,
-          INITIAL_POSITION.y,
-          INITIAL_POSITION.z,
-          INITIAL_GEOMETRY.height,
-          INITIAL_GEOMETRY.width
+          INITIAL_POSITION,
+          INITIAL_SCALE
         );
       }
 
@@ -292,10 +286,13 @@
         // 3. 設定パネル内の機能
         zoomInButton.addEventListener('click', () => zoom('in'));
         zoomOutButton.addEventListener('click', () => zoom('out'));
+        // Y軸とX軸の移動
         moveUpButton.addEventListener('click', () => move('Y', MOVE_STEP));
         moveDownButton.addEventListener('click', () => move('Y', -MOVE_STEP));
         moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
         moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
+        
+        // リセット機能
         resetButton.addEventListener('click', resetPaintingPosition);
       });
     </script>
