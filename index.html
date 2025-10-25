@@ -12,30 +12,30 @@
       body { margin: 0; overflow: hidden; font-family: sans-serif; }
       
       /* =================================================== */
-      /* 1. 初期表示アイコン (右下) */
+      /* 1. 初期表示アイコン (右下) - サイズを拡大 */
       /* =================================================== */
       #initial-buttons-container {
         position: fixed;
-        bottom: 15px;
-        right: 15px;
+        bottom: 20px; /* 位置を少し上げる */
+        right: 20px; /* 位置を少し内側に入れる */
         z-index: 1000;
         display: flex;
-        flex-direction: column; /* 縦並び */
-        gap: 10px;
+        flex-direction: column; 
+        gap: 12px; /* 間隔を広げる */
       }
       
       .initial-icon-button {
         background-color: rgba(100, 100, 100, 0.8);
         color: white;
-        padding: 15px; 
+        padding: 18px; /* パディングを増やす */
         border-radius: 50%;
-        font-size: 24px;
+        font-size: 28px; /* フォントサイズを大きく */
         border: none;
         cursor: pointer;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         transition: background-color 0.2s;
-        width: 60px;
-        height: 60px;
+        width: 70px; /* 幅を広げる */
+        height: 70px; /* 高さを広げる */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -46,87 +46,123 @@
       #info-icon-button { 
         background-color: rgba(66, 133, 244, 0.8); /* 青色 */
       }
-      /* モード切替アイコン（初期は緑色の固定モード） */
+      /* モード切替アイコン */
       #mode-icon-button {
         background-color: rgba(40, 167, 69, 0.8); /* 緑色 */
       }
 
 
       /* =================================================== */
-      /* 2. 設定パネル (オーバーレイ) */
+      /* 2. 設定パネル (オーバーレイ) - サイズを拡大し、操作しやすくする */
       /* =================================================== */
       #settings-panel {
         position: fixed;
-        bottom: 10px;
+        bottom: 15px; /* 位置を少し上げる */
         left: 10px;
         right: 10px;
         z-index: 999;
-        display: none; /* 初期は非表示 */
+        display: none; 
         flex-wrap: wrap; 
         justify-content: space-around; 
-        gap: 8px; 
-        padding: 10px;
-        background-color: rgba(0, 0, 0, 0.85);
-        border-radius: 12px; 
+        gap: 10px; /* 間隔を広げる */
+        padding: 15px; /* パディングを増やす */
+        background-color: rgba(0, 0, 0, 0.88); /* 背景を濃く */
+        border-radius: 16px; /* 角を丸く */
         box-sizing: border-box; 
+        max-width: 500px; /* デスクトップでの最大幅を制限 */
+        margin: 0 auto; /* 中央寄せ */
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
       }
       
       .setting-button {
         /* 3列レイアウトを維持 */
-        flex-basis: calc(33% - 8px); 
-        min-width: 90px; 
-        padding: 12px 10px; 
+        flex-basis: calc(33% - 10px); 
+        min-width: 100px; /* 最小幅を確保 */
+        padding: 15px 10px; /* パディングを増やす */
         color: white;
         border: none;
-        border-radius: 25px; 
-        font-size: 14px; 
+        border-radius: 30px; /* 角をさらに丸く */
+        font-size: 16px; /* フォントサイズを大きく */
         font-weight: bold;
         text-align: center;
         cursor: pointer;
-        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4); 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
         transition: background-color 0.2s, transform 0.1s;
       }
       .setting-button:active {
-        transform: translateY(1px);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        transform: translateY(2px); /* 押し込み感を強調 */
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
       }
 
       /* 個別ボタンのスタイル */
-      #zoom-in-button, #zoom-out-button { background-color: #007bff; flex-basis: calc(50% - 4px); }
-      #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
-      #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
+      #zoom-in-button, #zoom-out-button { 
+        background-color: #007bff; 
+        flex-basis: calc(50% - 5px); /* 2列レイアウトを維持 */
+      }
+      #move-up-button, #move-down-button, #move-left-button, #move-right-button { 
+        background-color: #ffc107; 
+        color: #333; 
+        flex-basis: calc(25% - 7.5px); /* 4列レイアウトに変更 (上下左右) */
+        min-width: 60px;
+      }
+      /* ⬆️ ⬇️ ⬅️ ➡️ のボタンのパディングを均等にする */
+      #move-up-button, #move-down-button, #move-left-button, #move-right-button {
+         padding: 15px 5px; 
+      }
       
+      #reset-button { 
+        background-color: #dc3545; 
+        flex-grow: 1; 
+        margin-top: 5px; /* 上の行との間隔を空ける */
+        padding: 15px 10px;
+      }
+      
+      /* ズームボタンを独立した行にする */
+      .zoom-row {
+          display: flex;
+          width: 100%;
+          gap: 10px;
+          margin-bottom: 5px;
+      }
+
+      /* 移動ボタンの行 */
+      .move-row {
+          display: flex;
+          width: 100%;
+          gap: 10px;
+      }
       
       /* =================================================== */
-      /* 3. 解説パネル (オーバーレイ) */
+      /* 3. 解説パネル (オーバーレイ) - 見やすく調整 */
       /* =================================================== */
       #explanation-panel {
         position: fixed;
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: rgba(255, 255, 255, 0.95);
+        background-color: rgba(255, 255, 255, 0.98); /* 不透明度を上げる */
         color: #333;
-        padding: 15px 25px;
-        border-radius: 8px;
+        padding: 20px 30px; /* パディングを増やす */
+        border-radius: 10px;
         z-index: 998;
         text-align: center;
-        width: 80%;
-        max-width: 400px;
+        width: 90%; /* 幅を広げる */
+        max-width: 450px;
         pointer-events: auto;
-        display: none; /* 初期は非表示 */
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        display: none; 
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* 影を強調 */
       }
       #explanation-panel h3 {
-        margin: 0 0 5px 0;
-        font-size: 20px;
+        margin: 0 0 8px 0;
+        font-size: 22px;
         color: #6f42c1;
       }
       #explanation-panel p {
         margin: 0;
-        font-size: 14px;
-        /* 空行を表現するための追加スタイル */
-        line-height: 1.5; 
+        font-size: 16px; /* フォントサイズを大きく */
+        line-height: 1.6; 
       }
     </style>
   </head>
@@ -148,7 +184,7 @@
       <!-- geometry属性はJSで動的に設定するため、ここではIDとmaterialのみ残す -->
       <a-entity id="ar-painting"
         material="src: #painting-asset; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -2.0" 
+        position="0 0.3 -1.5"  <!-- Z座標を-2.0から-1.5に変更 (より近くに) -->
         rotation="0 0 0"
         scale="1 1 1">
       </a-entity>
@@ -165,15 +201,20 @@
 
     <!-- UI: 設定パネル (詳細操作) -->
     <div id="settings-panel">
+      
       <!-- 1行目: ズーム (2列に再配置) -->
-      <button id="zoom-in-button" class="setting-button"></button>
-      <button id="zoom-out-button" class="setting-button"></button>
+      <div class="zoom-row">
+          <button id="zoom-in-button" class="setting-button"></button>
+          <button id="zoom-out-button" class="setting-button"></button>
+      </div>
       
       <!-- 2行目: 上下左右 -->
-      <button id="move-up-button" class="setting-button"></button>
-      <button id="move-down-button" class="setting-button"></button>
-      <button id="move-left-button" class="setting-button"></button>
-      <button id="move-right-button" class="setting-button"></button>
+      <div class="move-row">
+          <button id="move-up-button" class="setting-button"></button>
+          <button id="move-down-button" class="setting-button"></button>
+          <button id="move-left-button" class="setting-button"></button>
+          <button id="move-right-button" class="setting-button"></button>
+      </div>
 
       <!-- 3行目: リセット -->
       <button id="reset-button" class="setting-button"></button>
@@ -192,7 +233,7 @@
       const UI_TEXTS = {
           // 🖼️ アートワーク設定 (ここを新しい作品に合わせて変更します)
           imageSrc: 'lasmeninas_transparent.png', // 画像ファイル名
-          paintingWidthPx: 2760,  // 絵画の幅 (ピクセル単位で入力)
+          paintingWidthPx: 2760,  // 絵画の幅 (ピクセル単位で入力)
           paintingHeightPx: 3180, // 絵画の高さ (ピクセル単位で入力)
           
           // 📝 解説パネル内のテキスト
@@ -207,7 +248,7 @@
           moveDown: '⬇️ 下へ',
           moveLeft: '⬅️ 左へ',
           moveRight: '➡️ 右へ',
-          reset: '↩️ 初期値にリセット',
+          reset: '↩️ リセット',
           
           // 🔄 モード切替アイコン
           modeFixedIcon: '🔄', // 固定モードのアイコン
@@ -218,24 +259,27 @@
       // グローバル変数の設定
       const PAINTING_EL = document.getElementById('ar-painting');
       const PAINTING_ASSET = document.getElementById('painting-asset');
-      const CAMERA_EL = document.getElementById('ar-camera'); 
+      const CAMERA_EL = document.getElementById('ar-camera'); 
       const INFO_PANEL = document.getElementById('explanation-panel');
       
       const SETTINGS_ICON_BUTTON = document.getElementById('settings-icon-button');
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
-      const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     
+      const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     
 
-      // 定義: モードごとの初期位置
-      const FIXED_POSITION = { x: 0, y: 0.3, z: -2.0 };     
-      const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -4.0 };   
-      const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
+      // 定義: モードごとの初期位置を調整
+      const FIXED_POSITION = { x: 0, y: 0.3, z: -1.5 };      // Zを-2.0から-1.5に変更
+      const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -3.0 };   // 臨場感モードのZも調整
+      const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
       // 定数
-      const ZOOM_STEP = 0.2;   
-      const MOVE_STEP = 0.1;   
-      const MAX_SCALE = 3.0;   
-      const MIN_SCALE = 0.5;   
+      const ZOOM_STEP = 0.2;   
+      const MOVE_STEP = 0.1;   
+      const MAX_SCALE = 3.0;   
+      const MIN_SCALE = 0.5;   
+      
+      // 絵画の基準長さを2.0メートルから1.5メートルに変更 (大きすぎるのを防ぐ)
+      const MAX_DIMENSION_M = 1.5; 
 
       /**
        * 3Dエンティティの位置とスケールを一括で更新する
@@ -261,7 +305,7 @@
           // 解説パネル
           document.getElementById('panel-title').textContent = UI_TEXTS.title;
           document.getElementById('panel-author').textContent = UI_TEXTS.author;
-          document.getElementById('panel-usage').innerHTML = UI_TEXTS.usage; 
+          document.getElementById('panel-usage').innerHTML = UI_TEXTS.usage; 
       }
       
       /**
@@ -275,9 +319,7 @@
           const widthPx = UI_TEXTS.paintingWidthPx;
           const heightPx = UI_TEXTS.paintingHeightPx;
 
-          // 最も長い辺を基準長さ (2.0メートル) にスケーリング
-          // これにより、絵画の見た目の大きさが常に適切に保たれる
-          const MAX_DIMENSION_M = 2.0; 
+          // 最も長い辺を基準長さ (MAX_DIMENSION_M) にスケーリング
           const maxPx = Math.max(widthPx, heightPx);
           
           // スケーリングファクタを計算
@@ -294,7 +336,7 @@
           });
           
           // 3. 寸法が変わっても、初期位置をリセットして適切なZ距離にする
-          resetPaintingPosition(); 
+          resetPaintingPosition(); 
       }
 
 
@@ -304,9 +346,9 @@
         
         let newScaleValue;
         if (direction === 'in') {
-          newScaleValue = Math.min(MAX_SCALE, currentScale.x + ZOOM_STEP); 
+          newScaleValue = Math.min(MAX_SCALE, currentScale.x + ZOOM_STEP); 
         } else {
-          newScaleValue = Math.max(MIN_SCALE, currentScale.x - ZOOM_STEP); 
+          newScaleValue = Math.max(MIN_SCALE, currentScale.x - ZOOM_STEP); 
         }
 
         if (newScaleValue !== currentScale.x) {
@@ -324,7 +366,7 @@
         
         let newX = currentPos.x;
         let newY = currentPos.y;
-        let newZ = currentPos.z; 
+        let newZ = currentPos.z; 
 
         if (axis === 'X') {
           newX = currentPos.x + step;
@@ -365,16 +407,16 @@
         let currentPos = PAINTING_EL.getAttribute('position');
         let currentScale = PAINTING_EL.getAttribute('scale');
 
-        PAINTING_EL.setAttribute('position', { 
-            x: currentPos.x, 
-            y: currentPos.y, 
-            z: targetPositionZ 
+        PAINTING_EL.setAttribute('position', { 
+            x: currentPos.x, 
+            y: currentPos.y, 
+            z: targetPositionZ 
         });
 
         const iconBgColor = newEnabled ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)';
         const iconColor = newEnabled ? '#333' : 'white';
 
-        MODE_ICON_BUTTON.textContent = newEnabled ? UI_TEXTS.modeImmersiveIcon : UI_TEXTS.modeFixedIcon; 
+        MODE_ICON_BUTTON.textContent = newEnabled ? UI_TEXTS.modeImmersiveIcon : UI_TEXTS.modeFixedIcon; 
         MODE_ICON_BUTTON.style.backgroundColor = iconBgColor;
         MODE_ICON_BUTTON.style.color = iconColor;
       }
@@ -385,7 +427,7 @@
         
         // 1. UIテキストとアセットを適用する (最重要)
         applyUITexts();
-        applyPaintingAssets(); 
+        applyPaintingAssets(); 
 
         const zoomInButton = document.getElementById('zoom-in-button');
         const zoomOutButton = document.getElementById('zoom-out-button');
@@ -403,10 +445,11 @@
         // 1. 設定パネル表示/非表示トグル (⚙️)
         SETTINGS_ICON_BUTTON.addEventListener('click', () => {
           const isVisible = SETTINGS_PANEL.style.display === 'flex';
-          SETTINGS_PANEL.style.display = isVisible ? 'none' : 'flex'; 
+          SETTINGS_PANEL.style.display = isVisible ? 'none' : 'flex'; 
           
+          // 設定パネルを開くときは解説パネルを閉じる
           if (!isVisible) {
-            INFO_PANEL.style.display = 'none'; 
+            INFO_PANEL.style.display = 'none'; 
           }
         });
 
@@ -415,6 +458,7 @@
           const isVisible = INFO_PANEL.style.display === 'block';
           INFO_PANEL.style.display = isVisible ? 'none' : 'block';
           
+          // 解説パネルを開くときは設定パネルを閉じる
           if (!isVisible) {
             SETTINGS_PANEL.style.display = 'none';
           }
