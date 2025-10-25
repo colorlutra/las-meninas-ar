@@ -137,18 +137,17 @@
       vr-mode-ui="enabled: false">
 
       <a-assets>
-        <!-- 画像アセットはそのまま維持 -->
-        <img id="meninas" src="lasmeninas_transparent.png">
+        <!-- 画像アセット: srcはJSで動的に設定するため、ここではIDのみ残す -->
+        <img id="painting-asset" src="">
       </a-assets>
 
       <!-- A-Frameデフォルトカメラ -->
-      <!-- AR Paintingをカメラの子から外しました (ワールド座標で固定される) -->
       <a-entity id="ar-camera" camera look-controls="enabled: false" position="0 0 0"></a-entity>
       
       <!-- 安定したジオメトリと位置 (ワールド座標に配置) -->
+      <!-- geometry属性はJSで動的に設定するため、ここではIDとmaterialのみ残す -->
       <a-entity id="ar-painting"
-        geometry="primitive: plane; height: 2.169; width: 1.0"  
-        material="src: #meninas; transparent: true; alphaTest: 0.05"
+        material="src: #painting-asset; transparent: true; alphaTest: 0.05"
         position="0 0.3 -2.0" 
         rotation="0 0 0"
         scale="1 1 1">
@@ -161,57 +160,82 @@
       <button id="settings-icon-button" class="initial-icon-button">⚙️</button>
       <button id="info-icon-button" class="initial-icon-button">💡</button>
       <!-- モード切替アイコンをここに追加 -->
-      <button id="mode-icon-button" class="initial-icon-button">🔄</button>
+      <button id="mode-icon-button" class="initial-icon-button" id="mode-icon-button">🔄</button>
     </div>
 
     <!-- UI: 設定パネル (詳細操作) -->
     <div id="settings-panel">
       <!-- 1行目: ズーム (2列に再配置) -->
-      <button id="zoom-in-button" class="setting-button">➕ 拡大</button>
-      <button id="zoom-out-button" class="setting-button">➖ 縮小</button>
+      <button id="zoom-in-button" class="setting-button"></button>
+      <button id="zoom-out-button" class="setting-button"></button>
       
       <!-- 2行目: 上下左右 -->
-      <button id="move-up-button" class="setting-button">⬆️ 上へ</button>
-      <button id="move-down-button" class="setting-button">⬇️ 下へ</button>
-      <button id="move-left-button" class="setting-button">⬅️ 左へ</button>
-      <button id="move-right-button" class="setting-button">➡️ 右へ</button>
+      <button id="move-up-button" class="setting-button"></button>
+      <button id="move-down-button" class="setting-button"></button>
+      <button id="move-left-button" class="setting-button"></button>
+      <button id="move-right-button" class="setting-button"></button>
 
       <!-- 3行目: リセット -->
-      <button id="reset-button" class="setting-button">↩️ 初期値にリセット</button>
+      <button id="reset-button" class="setting-button"></button>
     </div>
 
     <!-- UI: 解説パネル (テキストを整理) -->
     <div id="explanation-panel">
-      <h3>ラス・メニーナス (女官たち)</h3>
+      <h3 id="panel-title"></h3>
       <!-- 空行を表現するためにpタグを分ける -->
-      <p>作者: ディエゴ・ベラスケス (1656年頃)</p>
-      <p>💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！</p>
+      <p id="panel-author"></p>
+      <p id="panel-usage"></p>
     </div>
 
     <script>
+      // 🌟🌟🌟 ここを編集すれば、アートワークとUIのテキストを一括で変更できます 🌟🌟🌟
+      const UI_TEXTS = {
+          // 🖼️ アートワーク設定 (ここを新しい作品に合わせて変更します)
+          imageSrc: 'lasmeninas_transparent.png', // 画像ファイル名
+          paintingWidthPx: 2760,  // 絵画の幅 (ピクセル単位で入力)
+          paintingHeightPx: 3180, // 絵画の高さ (ピクセル単位で入力)
+          
+          // 📝 解説パネル内のテキスト
+          title: 'ラス・メニーナス (女官たち)',
+          author: '作者: ディエゴ・ベラスケス (1656年頃)',
+          usage: '💡 **使い方**：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！',
+          
+          // ⚙️ 設定パネル内のボタンテキスト
+          zoomIn: '➕ 拡大',
+          zoomOut: '➖ 縮小',
+          moveUp: '⬆️ 上へ',
+          moveDown: '⬇️ 下へ',
+          moveLeft: '⬅️ 左へ',
+          moveRight: '➡️ 右へ',
+          reset: '↩️ 初期値にリセット',
+          
+          // 🔄 モード切替アイコン
+          modeFixedIcon: '🔄', // 固定モードのアイコン
+          modeImmersiveIcon: '🕹️', // 臨場感モードのアイコン
+      };
+      // 🌟🌟🌟 ここまで 🌟🌟🌟
+
       // グローバル変数の設定
       const PAINTING_EL = document.getElementById('ar-painting');
-      const CAMERA_EL = document.getElementById('ar-camera'); // カメラエンティティを取得
+      const PAINTING_ASSET = document.getElementById('painting-asset');
+      const CAMERA_EL = document.getElementById('ar-camera'); 
       const INFO_PANEL = document.getElementById('explanation-panel');
       
       const SETTINGS_ICON_BUTTON = document.getElementById('settings-icon-button');
       const INFO_ICON_BUTTON = document.getElementById('info-icon-button');
       const SETTINGS_PANEL = document.getElementById('settings-panel');
-      
-      // モード切替ボタン (アイコンのみ残る)
-      const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     // 初期表示のアイコン
+      const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     
 
       // 定義: モードごとの初期位置
-      // ar-paintingがカメラの子ではないため、これらの座標はワールド座標となる
-      const FIXED_POSITION = { x: 0, y: 0.3, z: -2.0 };     // 固定モード (撮影向け): 近い位置
-      const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -4.0 };   // 臨場感モード (没入向け): 遠い位置
+      const FIXED_POSITION = { x: 0, y: 0.3, z: -2.0 };     
+      const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -4.0 };   
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
       // 定数
-      const ZOOM_STEP = 0.2;   // スケール変更のステップを微調整
-      const MOVE_STEP = 0.1;   // 移動のステップ (m単位)を微調整
-      const MAX_SCALE = 3.0;   // 最大スケールを調整
-      const MIN_SCALE = 0.5;   // 最小スケール
+      const ZOOM_STEP = 0.2;   
+      const MOVE_STEP = 0.1;   
+      const MAX_SCALE = 3.0;   
+      const MIN_SCALE = 0.5;   
 
       /**
        * 3Dエンティティの位置とスケールを一括で更新する
@@ -220,6 +244,59 @@
           PAINTING_EL.setAttribute('position', position);
           PAINTING_EL.setAttribute('scale', scale);
       }
+
+      /**
+       * UI_TEXTSオブジェクトの内容をHTML要素に適用する
+       */
+      function applyUITexts() {
+          // 設定パネル内のボタン
+          document.getElementById('zoom-in-button').innerHTML = UI_TEXTS.zoomIn;
+          document.getElementById('zoom-out-button').innerHTML = UI_TEXTS.zoomOut;
+          document.getElementById('move-up-button').innerHTML = UI_TEXTS.moveUp;
+          document.getElementById('move-down-button').innerHTML = UI_TEXTS.moveDown;
+          document.getElementById('move-left-button').innerHTML = UI_TEXTS.moveLeft;
+          document.getElementById('move-right-button').innerHTML = UI_TEXTS.moveRight;
+          document.getElementById('reset-button').innerHTML = UI_TEXTS.reset;
+
+          // 解説パネル
+          document.getElementById('panel-title').textContent = UI_TEXTS.title;
+          document.getElementById('panel-author').textContent = UI_TEXTS.author;
+          document.getElementById('panel-usage').innerHTML = UI_TEXTS.usage; 
+      }
+      
+      /**
+       * アートワークのアセット(画像と寸法)をA-Frameに適用する
+       */
+      function applyPaintingAssets() {
+          // 1. 画像ソースの更新
+          PAINTING_ASSET.src = UI_TEXTS.imageSrc;
+
+          // 2. ジオメトリ（寸法）の計算と更新 (ピクセル -> メートル)
+          const widthPx = UI_TEXTS.paintingWidthPx;
+          const heightPx = UI_TEXTS.paintingHeightPx;
+
+          // 最も長い辺を基準長さ (2.0メートル) にスケーリング
+          // これにより、絵画の見た目の大きさが常に適切に保たれる
+          const MAX_DIMENSION_M = 2.0; 
+          const maxPx = Math.max(widthPx, heightPx);
+          
+          // スケーリングファクタを計算
+          const scaleFactor = MAX_DIMENSION_M / maxPx;
+          
+          // メートル単位の幅と高さを計算
+          const paintingWidthM = widthPx * scaleFactor;
+          const paintingHeightM = heightPx * scaleFactor;
+          
+          PAINTING_EL.setAttribute('geometry', {
+              primitive: 'plane',
+              width: paintingWidthM,
+              height: paintingHeightM
+          });
+          
+          // 3. 寸法が変わっても、初期位置をリセットして適切なZ距離にする
+          resetPaintingPosition(); 
+      }
+
 
       // --- ズーム機能 (Scale操作 - 縦横比維持) ---
       function zoom(direction) {
@@ -278,33 +355,26 @@
 
       // --- モード切替機能 ---
       function toggleCameraMode() {
-        // look-controlsの状態を取得
         const isEnabled = CAMERA_EL.getAttribute('look-controls').enabled;
         const newEnabled = !isEnabled;
         
-        // 1. カメラ設定の切り替え
         CAMERA_EL.setAttribute('look-controls', { enabled: newEnabled });
 
-        // 2. 絵の位置の調整 (Z軸の変更)
-        // ワールド座標なので、X/Y/Z軸はワールド座標を基準に調整
         const targetPositionZ = newEnabled ? IMMERSIVE_POSITION.z : FIXED_POSITION.z;
         
-        // Note: X/Y軸の位置とスケールは現在の値を維持し、Z軸のみ変更
         let currentPos = PAINTING_EL.getAttribute('position');
         let currentScale = PAINTING_EL.getAttribute('scale');
 
         PAINTING_EL.setAttribute('position', { 
             x: currentPos.x, 
             y: currentPos.y, 
-            z: targetPositionZ // Z軸のみターゲットの位置を使用
+            z: targetPositionZ 
         });
 
-        // 3. アイコンのテキストと色の更新
         const iconBgColor = newEnabled ? 'rgba(255, 193, 7, 0.8)' : 'rgba(40, 167, 69, 0.8)';
         const iconColor = newEnabled ? '#333' : 'white';
 
-        // アイコンを更新
-        MODE_ICON_BUTTON.textContent = newEnabled ? '🕹️' : '🔄'; 
+        MODE_ICON_BUTTON.textContent = newEnabled ? UI_TEXTS.modeImmersiveIcon : UI_TEXTS.modeFixedIcon; 
         MODE_ICON_BUTTON.style.backgroundColor = iconBgColor;
         MODE_ICON_BUTTON.style.color = iconColor;
       }
@@ -312,6 +382,11 @@
 
       // --- イベントリスナーの設定 ---
       document.addEventListener('DOMContentLoaded', () => {
+        
+        // 1. UIテキストとアセットを適用する (最重要)
+        applyUITexts();
+        applyPaintingAssets(); 
+
         const zoomInButton = document.getElementById('zoom-in-button');
         const zoomOutButton = document.getElementById('zoom-out-button');
         const moveUpButton = document.getElementById('move-up-button');
@@ -321,7 +396,7 @@
         const resetButton = document.getElementById('reset-button');
         
         // 初期モードの設定 (固定モード)
-        MODE_ICON_BUTTON.textContent = '🔄';
+        MODE_ICON_BUTTON.textContent = UI_TEXTS.modeFixedIcon;
         MODE_ICON_BUTTON.style.backgroundColor = 'rgba(40, 167, 69, 0.8)';
 
 
@@ -330,7 +405,6 @@
           const isVisible = SETTINGS_PANEL.style.display === 'flex';
           SETTINGS_PANEL.style.display = isVisible ? 'none' : 'flex'; 
           
-          // 設定パネル表示中は解説パネルを非表示にする
           if (!isVisible) {
             INFO_PANEL.style.display = 'none'; 
           }
@@ -341,7 +415,6 @@
           const isVisible = INFO_PANEL.style.display === 'block';
           INFO_PANEL.style.display = isVisible ? 'none' : 'block';
           
-          // 解説パネル表示中は設定パネルを非表示にする
           if (!isVisible) {
             SETTINGS_PANEL.style.display = 'none';
           }
@@ -350,17 +423,13 @@
         // 3. 設定パネル内の機能
         zoomInButton.addEventListener('click', () => zoom('in'));
         zoomOutButton.addEventListener('click', () => zoom('out'));
-        // Y軸とX軸の移動
         moveUpButton.addEventListener('click', () => move('Y', MOVE_STEP));
         moveDownButton.addEventListener('click', () => move('Y', -MOVE_STEP));
         moveLeftButton.addEventListener('click', () => move('X', -MOVE_STEP));
         moveRightButton.addEventListener('click', () => move('X', MOVE_STEP));
         
-        // モード切替 (アイコンのみにリスナーを設定)
         MODE_ICON_BUTTON.addEventListener('click', toggleCameraMode);
 
-
-        // リセット機能
         resetButton.addEventListener('click', resetPaintingPosition);
       });
     </script>
