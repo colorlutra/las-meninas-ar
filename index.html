@@ -12,48 +12,48 @@
       body { margin: 0; overflow: hidden; font-family: sans-serif; }
       
       /* =================================================== */
-      /* 1. 初期表示アイコン (右下) - サイズを拡大 (変更なし) */
+      /* 1. 初期表示アイコン (右下) - サイズをさらに大きく、モバイルフレンドリーに */
       /* =================================================== */
       #initial-buttons-container {
         position: fixed;
-        bottom: 20px; 
-        right: 20px; 
+        bottom: 25px; /* 位置を調整 */
+        right: 25px; /* 位置を調整 */
         z-index: 1000;
         display: flex;
         flex-direction: column; 
-        gap: 12px; 
+        gap: 15px; /* 間隔を広げる */
       }
       
       .initial-icon-button {
-        background-color: rgba(100, 100, 100, 0.8);
+        background-color: rgba(100, 100, 100, 0.9); /* 不透明度を上げる */
         color: white;
-        padding: 18px; 
+        padding: 20px; /* パディングをさらに増やす */
         border-radius: 50%;
-        font-size: 28px; 
+        font-size: 32px; /* フォントサイズを大きく */
         border: none;
         cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6); /* 影を強調 */
         transition: background-color 0.2s;
-        width: 70px; 
-        height: 70px; 
+        width: 75px; /* 幅を広げる */
+        height: 75px; /* 高さを広げる */
         display: flex;
         justify-content: center;
         align-items: center;
       }
       #settings-icon-button {
-          background-color: rgba(111, 66, 193, 0.8); /* 紫色 */
+          background-color: rgba(111, 66, 193, 0.9); /* 紫色 */
       }
       #info-icon-button { 
-        background-color: rgba(66, 133, 244, 0.8); /* 青色 */
+        background-color: rgba(66, 133, 244, 0.9); /* 青色 */
       }
       /* モード切替アイコン */
       #mode-icon-button {
-        background-color: rgba(40, 167, 69, 0.8); /* 緑色 */
+        background-color: rgba(40, 167, 69, 0.9); /* 緑色 */
       }
 
 
       /* =================================================== */
-      /* 2. 設定パネル (オーバーレイ) - サイズ拡大、モードボタンなし (変更なし) */
+      /* 2. 設定パネル (オーバーレイ) - サイズを拡大し、操作しやすくする (変更なし) */
       /* =================================================== */
       #settings-panel {
         position: fixed;
@@ -134,7 +134,7 @@
       }
       
       /* =================================================== */
-      /* 3. 解説パネル (オーバーレイ) - テキストブロックを増やし、簡潔に表示 */
+      /* 3. 解説パネル (オーバーレイ) - 整理された内容 (変更なし) */
       /* =================================================== */
       #explanation-panel {
         position: fixed;
@@ -159,7 +159,6 @@
         color: #6f42c1;
       }
       #explanation-panel p {
-        /* Pタグ間のマージンを調整し、空行のように見せる */
         margin: 10px 0; 
         font-size: 16px; 
         line-height: 1.6; 
@@ -188,7 +187,7 @@
       <!-- 安定したジオメトリと位置 (ワールド座標に配置) -->
       <a-entity id="ar-painting"
         material="src: #painting-asset; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -1.5"  <!-- 初期位置を調整済 -->
+        position="0 0.3 -2.0"  <!-- 修正: Zを-2.0mに戻す -->
         rotation="0 0 0"
         scale="1 1 1">
       </a-entity>
@@ -276,7 +275,7 @@
       const MODE_ICON_BUTTON = document.getElementById('mode-icon-button');     
 
       // 定義: モードごとの初期位置を調整
-      const FIXED_POSITION = { x: 0, y: 0.3, z: -1.5 };      
+      const FIXED_POSITION = { x: 0, y: 0.3, z: -2.0 };      // 修正: Zを-2.0mに戻す
       const IMMERSIVE_POSITION = { x: 0, y: 0.3, z: -3.0 };   
       const INITIAL_SCALE = { x: 1, y: 1, z: 1 };         
       
@@ -285,7 +284,7 @@
       const MOVE_STEP = 0.1;   
       const MAX_SCALE = 3.0;   
       const MIN_SCALE = 0.5;   
-      const MAX_DIMENSION_M = 1.5;  // 絵画の基準長さ
+      const MAX_DIMENSION_M = 2.0;  // 修正: 絵画の基準長さを2.0メートルに戻す
 
       /**
        * 3Dエンティティの位置とスケールを一括で更新する
@@ -308,7 +307,7 @@
           document.getElementById('move-right-button').innerHTML = UI_TEXTS.moveRight;
           document.getElementById('reset-button').innerHTML = UI_TEXTS.reset;
 
-          // 解説パネル (修正点: 3つのPタグに対応)
+          // 解説パネル 
           document.getElementById('panel-title').textContent = UI_TEXTS.title;
           document.getElementById('panel-author').textContent = UI_TEXTS.author;
           document.getElementById('panel-usage-part1').textContent = UI_TEXTS.usagePart1;
@@ -326,9 +325,13 @@
           const widthPx = UI_TEXTS.paintingWidthPx;
           const heightPx = UI_TEXTS.paintingHeightPx;
 
+          // 最も長い辺を基準長さ (MAX_DIMENSION_M = 2.0m) にスケーリング
           const maxPx = Math.max(widthPx, heightPx);
+          
+          // スケーリングファクタを計算
           const scaleFactor = MAX_DIMENSION_M / maxPx;
           
+          // メートル単位の幅と高さを計算
           const paintingWidthM = widthPx * scaleFactor;
           const paintingHeightM = heightPx * scaleFactor;
           
@@ -441,7 +444,7 @@
         
         // 初期モードの設定 (固定モード)
         MODE_ICON_BUTTON.textContent = UI_TEXTS.modeFixedIcon;
-        MODE_ICON_BUTTON.style.backgroundColor = 'rgba(40, 167, 69, 0.8)';
+        MODE_ICON_BUTTON.style.backgroundColor = 'rgba(40, 167, 69, 0.9)'; // UI調整
 
 
         // 1. 設定パネル表示/非表示トグル (⚙️)
