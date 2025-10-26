@@ -1,120 +1,62 @@
-<style>
-    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ラス・メニーナス AR (ワールド座標構造)</title>
     
-    /* =================================================== */
-    /* 1. 初期表示アイコン (右下) - 🌟 サイズを大きく修正 🌟 */
-    /* =================================================== */
-    #initial-buttons-container {
-        position: fixed;
-        bottom: 20px; /* 位置を少し上に */
-        right: 20px; /* 位置を少し左に */
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 15px; /* 間隔を広く */
-    }
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.min.js"></script>
     
-    .initial-icon-button {
-        background-color: rgba(100, 100, 100, 0.8);
-        color: white;
-        padding: 20px; /* パディングを増やす */
-        border-radius: 50%;
-        font-size: 32px; /* アイコンサイズを大きく */
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        transition: background-color 0.2s;
-        width: 70px; /* 幅を広く */
-        height: 70px; /* 高さを広く */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    #settings-icon-button {
-        background-color: rgba(111, 66, 193, 0.8);
-    }
-    #info-icon-button { 
-        background-color: rgba(66, 133, 244, 0.8);
-    }
-    /* モード切替アイコン（初期は緑色の固定モード） */
-    #mode-icon-button {
-        background-color: rgba(40, 167, 69, 0.8);
-    }
+    <style>
+      body { margin: 0; overflow: hidden; font-family: sans-serif; }
+      
+      /* =================================================== */
+      /* 1. 初期表示アイコン (右下) - 🌟 サイズを大きく修正 🌟 */
+      /* =================================================== */
+      #initial-buttons-container {
+          position: fixed;
+          bottom: 20px; /* 位置を少し上に */
+          right: 20px; /* 位置を少し左に */
+          z-index: 1000;
+          display: flex;
+          flex-direction: column;
+          gap: 15px; /* 間隔を広く */
+      }
+      
+      .initial-icon-button {
+          background-color: rgba(100, 100, 100, 0.8);
+          color: white;
+          padding: 20px; /* パディングを増やす */
+          border-radius: 50%;
+          font-size: 32px; /* アイコンサイズを大きく */
+          border: none;
+          cursor: pointer;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+          transition: background-color 0.2s;
+          width: 70px; /* 幅を広く */
+          height: 70px; /* 高さを広く */
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+      #settings-icon-button {
+          background-color: rgba(111, 66, 193, 0.8);
+      }
+      #info-icon-button { 
+          background-color: rgba(66, 133, 244, 0.8);
+      }
+      /* モード切替アイコン（初期は緑色の固定モード） */
+      #mode-icon-button {
+          background-color: rgba(40, 167, 69, 0.8);
+      }
 
 
-    /* =================================================== */
-    /* 2. 設定パネル (オーバーレイ) - 🌟 サイズを大きく修正 🌟 */
-    /* =================================================== */
-    #settings-panel {
-        position: fixed;
-        bottom: 15px; /* 位置を調整 */
-        left: 15px;
-        right: 15px;
-        z-index: 999;
-        display: none;
-        flex-wrap: wrap; 
-        justify-content: space-around; 
-        gap: 10px; /* 間隔を広く */
-        padding: 15px; /* パディングを広く */
-        background-color: rgba(0, 0, 0, 0.9); /* 背景を少し濃く */
-        border-radius: 15px; /* 角を少し丸く */
-        box-sizing: border-box; 
-    }
-    
-    .setting-button {
-        /* 3列レイアウトを維持 */
-        flex-basis: calc(33% - 10px); 
-        min-width: 100px; /* 最小幅を広く */
-        padding: 15px 12px; /* パディングを広く */
-        color: white;
-        border: none;
-        border-radius: 30px; /* 角を丸く */
-        font-size: 16px; /* フォントサイズを大きく */
-        font-weight: bold;
-        text-align: center;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
-        transition: background-color 0.2s, transform 0.1s;
-    }
-    .setting-button:active {
-        transform: translateY(1px);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-    }
-
-    /* 個別ボタンのスタイル */
-    #zoom-in-button, #zoom-out-button { background-color: #007bff; flex-basis: calc(50% - 5px); }
-    #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
-    #reset-button { background-color: #dc3545; flex-grow: 1; }
-    
-    
-    /* =================================================== */
-    /* 3. 解説パネル (オーバーレイ) - 🌟 サイズを大きく修正 🌟 */
-    /* =================================================== */
-    #explanation-panel {
-        position: fixed;
-        top: 25px; /* 位置を調整 */
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(255, 255, 255, 0.98); /* 背景をほぼ不透明に */
-        color: #333;
-        padding: 20px 30px; /* パディングを広く */
-        border-radius: 10px;
-        z-index: 998;
-        text-align: center;
-        width: 85%; /* 幅を広く */
-        max-width: 450px; /* 最大幅を広く */
-        pointer-events: auto;
-        display: none;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    }
-    #explanation-panel h3 {
-        margin: 0 0 8px 0; /* マージンを調整 */
-        font-size: 22px; /* タイトルを大きく */
-        color: #6f42c1;
-    }
-    #explanation-panel p {
-        margin: 0;
-        font-size: 16px; /* テキストを大きく */
-        line-height: 1.6; /* 行間を調整 */
-    }
-</style>
+      /* =================================================== */
+      /* 2. 設定パネル (オーバーレイ) - 🌟 サイズを大きく修正 🌟 */
+      /* =================================================== */
+      #settings-panel {
+          position: fixed;
+          bottom: 15px; /* 位置を調整 */
+          left: 15px;
+          right: 15px;
+          z-index: 99
