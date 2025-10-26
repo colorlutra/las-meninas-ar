@@ -13,130 +13,123 @@
       body { margin: 0; overflow: hidden; font-family: sans-serif; }
       
       /* =================================================== */
-      /* 1. 初期表示アイコン (右下) - 🌟 px値で位置とサイズを固定 🌟 */
+      /* 1. 初期表示アイコン (右上) - 🌟位置を上部に変更🌟 */
       /* =================================================== */
       #initial-buttons-container {
           position: fixed;
-          bottom: 30px; /* 🌟 画面下端から30pxに固定 🌟 */
-          right: 30px; /* 🌟 画面右端から30pxに固定 🌟 */
-          z-index: 2000; 
+          /* bottom: 15px; */ /* 削除 */
+          top: 15px; /* 🌟上端から15pxに設定🌟 */
+          right: 15px;
+          z-index: 1000;
           display: flex;
-          flex-direction: column;
-          gap: 15px; /* 間隔もpxで固定 */
+          flex-direction: column; /* 縦並び */
+          gap: 10px;
       }
       
       .initial-icon-button {
           background-color: rgba(100, 100, 100, 0.8);
           color: white;
-          /* モバイルで確実に大きく見せるため、大きなpxで固定 */
-          width: 80px; 
-          height: 80px; 
-          font-size: 38px; /* アイコンサイズをさらに大きく */
-          padding: 0; 
-          
+          padding: 15px; 
           border-radius: 50%;
+          font-size: 24px;
           border: none;
           cursor: pointer;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
           transition: background-color 0.2s;
+          width: 60px;
+          height: 60px;
           display: flex;
           justify-content: center;
           align-items: center;
       }
       #settings-icon-button {
-          background-color: rgba(111, 66, 193, 0.8);
+           background-color: rgba(111, 66, 193, 0.8); /* 紫色 */
       }
       #info-icon-button { 
-          background-color: rgba(66, 133, 244, 0.8);
+        background-color: rgba(66, 133, 244, 0.8); /* 青色 */
       }
+      /* モード切替アイコン（初期は緑色の固定モード） */
       #mode-icon-button {
-          background-color: rgba(40, 167, 69, 0.8);
+        background-color: rgba(40, 167, 69, 0.8); /* 緑色 */
       }
 
 
       /* =================================================== */
-      /* 2. 設定パネル (オーバーレイ) - 🌟 px値で位置とサイズを固定 🌟 */
+      /* 2. 設定パネル (オーバーレイ) - 🌟位置を上部に変更🌟 */
       /* =================================================== */
       #settings-panel {
           position: fixed;
-          bottom: 120px; /* 🌟 画面下端から十分に離れた位置に固定 🌟 */
-          left: 15px;
-          right: 15px;
-          z-index: 1999; 
-          display: none;
+          /* bottom: 10px; */ /* 削除 */
+          top: 10px; /* 🌟上端から10pxに設定🌟 */
+          left: 10px;
+          right: 10px;
+          z-index: 999;
+          display: none; /* 初期は非表示 */
           flex-wrap: wrap; 
           justify-content: space-around; 
-          gap: 15px; /* 間隔を広く */
-          padding: 20px; /* パディングを広く */
-          background-color: rgba(0, 0, 0, 0.95);
-          border-radius: 15px; 
+          gap: 8px; 
+          padding: 10px;
+          background-color: rgba(0, 0, 0, 0.85);
+          border-radius: 12px; 
           box-sizing: border-box; 
       }
       
       .setting-button {
           /* 3列レイアウトを維持 */
-          flex-basis: calc(33% - 15px); 
-          min-width: 100px; 
-          padding: 20px 15px; /* 🌟 パディングをさらに広く (タッチエリア確保) 🌟 */
+          flex-basis: calc(33% - 8px); 
+          min-width: 90px; 
+          padding: 12px 10px; 
           color: white;
           border: none;
-          border-radius: 30px; 
-          font-size: 18px; /* フォントサイズを大きく */
+          border-radius: 25px; 
+          font-size: 14px; 
           font-weight: bold;
           text-align: center;
           cursor: pointer;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
+          box-shadow: 0 3px 7px rgba(0, 0, 0, 0.4); 
           transition: background-color 0.2s, transform 0.1s;
       }
       .setting-button:active {
           transform: translateY(1px);
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
       }
 
       /* 個別ボタンのスタイル */
-      #zoom-in-button, #zoom-out-button { 
-          background-color: #007bff; 
-          flex-basis: calc(50% - 8px); /* 2列の調整 (gap: 15pxの半分) */
-      }
-      #move-up-button, #move-down-button, #move-left-button, #move-right-button { 
-          background-color: #ffc107; 
-          color: #333; 
-      } 
-      #reset-button { 
-          background-color: #dc3545; 
-          flex-grow: 1; 
-      }
+      #zoom-in-button, #zoom-out-button { background-color: #007bff; flex-basis: calc(50% - 4px); }
+      #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
+      #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
       
       
       /* =================================================== */
-      /* 3. 解説パネル (オーバーレイ) - 🌟 サイズを大きく固定 🌟 */
+      /* 3. 解説パネル (オーバーレイ) - 🌟位置はそのまま (上部) 🌟 */
       /* =================================================== */
       #explanation-panel {
           position: fixed;
-          top: 40px; /* 画面上端から40pxに固定 */
+          top: 20px;
           left: 50%;
           transform: translateX(-50%);
-          background-color: rgba(255, 255, 255, 0.98);
+          background-color: rgba(255, 255, 255, 0.95);
           color: #333;
-          padding: 25px 35px; /* パディングを広く */
-          border-radius: 10px;
-          z-index: 1998; 
+          padding: 15px 25px;
+          border-radius: 8px;
+          z-index: 998;
           text-align: center;
-          width: 90%; 
-          max-width: 500px; 
+          width: 80%;
+          max-width: 400px;
           pointer-events: auto;
-          display: none;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+          display: none; /* 初期は非表示 */
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       }
       #explanation-panel h3 {
-          margin: 0 0 10px 0; 
-          font-size: 24px; /* タイトルを大きく */
+          margin: 0 0 5px 0;
+          font-size: 20px;
           color: #6f42c1;
       }
       #explanation-panel p {
           margin: 0;
-          font-size: 18px; /* テキストを大きく */
-          line-height: 1.6; 
+          font-size: 14px;
+          /* 空行を表現するための追加スタイル */
+          line-height: 1.5; 
       }
     </style>
   </head>
@@ -151,26 +144,4 @@
 
       <a-entity id="ar-camera" camera look-controls="enabled: false" position="0 0 0"></a-entity>
       
-      <a-entity id="ar-painting"
-        material="src: #painting-asset; transparent: true; alphaTest: 0.05"
-        position="0 0.3 -2.0" 
-        rotation="0 0 0"
-        scale="1 1 1">
-      </a-entity>
-      
-    </a-scene>
-
-    <div id="initial-buttons-container">
-      <button id="settings-icon-button" class="initial-icon-button">⚙️</button>
-      <button id="info-icon-button" class="initial-icon-button">💡</button>
-      <button id="mode-icon-button" class="initial-icon-button" id="mode-icon-button">🔄</button>
-    </div>
-
-    <div id="settings-panel">
-      <button id="zoom-in-button" class="setting-button"></button>
-      <button id="zoom-out-button" class="setting-button"></button>
-      
-      <button id="move-up-button" class="setting-button"></button>
-      <button id="move-down-button" class="setting-button"></button>
-      <button id="move-left-button" class="setting-button"></button>
-      <button id="move-right-
+      <a-entity
