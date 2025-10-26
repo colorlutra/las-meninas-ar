@@ -13,11 +13,11 @@
       body { margin: 0; overflow: hidden; font-family: sans-serif; }
       
       /* =================================================== */
-      /* 1. 初期表示アイコン (右上) - 🌟位置を上部に変更🌟 */
+      /* 1. 初期表示アイコン (右下) */
       /* =================================================== */
       #initial-buttons-container {
           position: fixed;
-          top: 15px; /* 🌟上端から15pxに設定🌟 */
+          bottom: 15px; /* 画面下端から15pxに設定 */
           right: 15px;
           z-index: 1000;
           display: flex;
@@ -47,18 +47,17 @@
       #info-icon-button { 
         background-color: rgba(66, 133, 244, 0.8); /* 青色 */
       }
-      /* モード切替アイコン（初期は緑色の固定モード） */
       #mode-icon-button {
         background-color: rgba(40, 167, 69, 0.8); /* 緑色 */
       }
 
 
       /* =================================================== */
-      /* 2. 設定パネル (オーバーレイ) - 🌟位置を上部に変更🌟 */
+      /* 2. 設定パネル (オーバーレイ) */
       /* =================================================== */
       #settings-panel {
           position: fixed;
-          top: 10px; /* 🌟上端から10pxに設定🌟 */
+          bottom: 10px; /* 画面下端から10pxに設定 */
           left: 10px;
           right: 10px;
           z-index: 999;
@@ -95,7 +94,7 @@
       /* 個別ボタンのスタイル */
       #zoom-in-button, #zoom-out-button { background-color: #007bff; flex-basis: calc(50% - 4px); }
       #move-up-button, #move-down-button, #move-left-button, #move-right-button { background-color: #ffc107; color: #333; } 
-      #reset-button { background-color: #dc3545; flex-grow: 1; } /* リセットボタン (赤) は幅いっぱいに */
+      #reset-button { background-color: #dc3545; flex-grow: 1; } 
       
       
       /* =================================================== */
@@ -188,8 +187,8 @@
           usage: '💡 使い方：⚙️設定ボタンから、ズームと矢印で絵の位置を調整し、顔の透明部分に人が映り込むトリックアートを完成させよう！',
           
           // ⚙️ 設定パネル内のボタンテキスト
-          zoomIn: '➕ 拡大',
-          zoomOut: '➖ 縮小',
+          zoomIn: '➕ 近くに', // 拡大を「近くに」に変更
+          zoomOut: '➖ 遠くに', // 縮小を「遠くに」に変更
           moveUp: '⬆️ 上へ',
           moveDown: '⬇️ 下へ',
           moveLeft: '⬅️ 左へ',
@@ -264,7 +263,6 @@
           const heightPx = UI_TEXTS.paintingHeightPx;
 
           // 最も長い辺を基準長さ (2.0メートル) にスケーリング
-          // これにより、絵画の見た目の大きさが常に適切に保たれる
           const MAX_DIMENSION_M = 2.0; 
           const maxPx = Math.max(widthPx, heightPx);
           
@@ -306,6 +304,9 @@
       }
 
       // --- 移動機能 (X, Y軸操作) ---
+      // X軸の操作は、正の値で右へ、負の値で左へ移動。
+      // Y軸の操作は、正の値で上へ、負の値で下へ移動。
+      // この設計は直感的です。
       function move(axis, step) {
         let currentPos = PAINTING_EL.getAttribute('position');
         let currentScale = PAINTING_EL.getAttribute('scale');
